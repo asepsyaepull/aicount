@@ -139,44 +139,48 @@ export function ProfilePage() {
             const provider = [...bankOptions, ...ewalletOptions].find(p => wallet.name.includes(p.name))
 
             return (
-              <div
-                key={wallet.id}
-                className="flex items-center gap-3 bg-white rounded-xl p-3.5 shadow-sm border border-gray-50 group"
-              >
-                {provider ? (
-                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1.5 shadow-sm">
-                    <img src={provider.logo.replace(/^public\//, '/')} alt={provider.name} className="max-h-full max-w-full object-contain" />
-                  </div>
-                ) : (
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: (wallet.color || '#2A9D8F') + '15' }}
-                  >
-                    <WalletIcon size={20} style={{ color: wallet.color || '#2A9D8F' }} />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-text truncate">{wallet.name}</p>
-                  <p className="text-[11px] text-text-muted capitalize">{wallet.type}</p>
-                </div>
-                <p className={`text-sm font-bold mr-1 ${wallet.balance >= 0 ? 'text-text' : 'text-red-500'}`}>
-                  Rp {formatCurrency(wallet.balance)}
-                </p>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div key={wallet.id} className="relative rounded-xl overflow-hidden shadow-sm border border-gray-50 bg-gray-50/50">
+                {/* Actions (Background) */}
+                <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-3 pl-4">
                   <button
                     onClick={() => openEditBalance(wallet)}
-                    className="w-7 h-7 rounded-lg bg-primary-50 flex items-center justify-center hover:bg-primary-100 transition-colors"
-                    title="Edit Balance"
+                    className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center active:bg-primary-200 transition-colors"
                   >
-                    <Pencil size={12} className="text-primary" />
+                    <Pencil size={14} className="text-primary-700" />
                   </button>
                   <button
                     onClick={() => setDeletingId(wallet.id)}
-                    className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center hover:bg-red-100 transition-colors"
-                    title="Delete Wallet"
+                    className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center active:bg-red-200 transition-colors"
                   >
-                    <Trash2 size={12} className="text-red-500" />
+                    <Trash2 size={14} className="text-red-500" />
                   </button>
+                </div>
+
+                {/* Swipeable Container (Foreground) */}
+                <div className="relative flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <div className="w-full shrink-0 snap-start bg-white flex items-center gap-3 p-3.5 rounded-xl border-transparent">
+                    {provider ? (
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1.5 shadow-sm">
+                        <img src={provider.logo.replace(/^public\//, '/')} alt={provider.name} className="max-h-full max-w-full object-contain" />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: (wallet.color || '#2A9D8F') + '15' }}
+                      >
+                        <WalletIcon size={20} style={{ color: wallet.color || '#2A9D8F' }} />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text truncate">{wallet.name}</p>
+                      <p className="text-[11px] text-text-muted capitalize">{wallet.type}</p>
+                    </div>
+                    <p className={`text-sm font-bold mr-1 ${wallet.balance >= 0 ? 'text-text' : 'text-red-500'}`}>
+                      Rp {formatCurrency(wallet.balance)}
+                    </p>
+                  </div>
+                  {/* Spacer to define swipe distance (88px) */}
+                  <div className="w-[88px] shrink-0 snap-end"></div>
                 </div>
               </div>
             )
