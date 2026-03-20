@@ -140,25 +140,9 @@ export function ProfilePage() {
 
             return (
               <div key={wallet.id} className="relative rounded-xl overflow-hidden shadow-sm border border-gray-50 bg-gray-50/50">
-                {/* Actions (Background) */}
-                <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-3 pl-4">
-                  <button
-                    onClick={() => openEditBalance(wallet)}
-                    className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center active:bg-primary-200 transition-colors"
-                  >
-                    <Pencil size={14} className="text-primary-700" />
-                  </button>
-                  <button
-                    onClick={() => setDeletingId(wallet.id)}
-                    className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center active:bg-red-200 transition-colors"
-                  >
-                    <Trash2 size={14} className="text-red-500" />
-                  </button>
-                </div>
-
-                {/* Swipeable Container (Foreground) */}
                 <div className="relative flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  <div className="w-full shrink-0 snap-start bg-white flex items-center gap-3 p-3.5 rounded-xl border-transparent">
+                  {/* Main Card (100% width) */}
+                  <div className="w-full shrink-0 snap-center bg-white flex items-center gap-3 p-3.5 border-transparent">
                     {provider ? (
                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1.5 shadow-sm">
                         <img src={provider.logo.replace(/^public\//, '/')} alt={provider.name} className="max-h-full max-w-full object-contain" />
@@ -179,8 +163,22 @@ export function ProfilePage() {
                       Rp {formatCurrency(wallet.balance)}
                     </p>
                   </div>
-                  {/* Spacer to define swipe distance (88px) */}
-                  <div className="w-[88px] shrink-0 snap-end"></div>
+
+                  {/* Accessible Actions Layer at the end of scroll */}
+                  <div className="shrink-0 snap-end flex items-center gap-1.5 px-3 bg-gray-50/50 border-l border-gray-100">
+                    <button
+                      onClick={() => openEditBalance(wallet)}
+                      className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center active:bg-primary-200 transition-colors"
+                    >
+                      <Pencil size={14} className="text-primary-700" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingId(wallet.id)}
+                      className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center active:bg-red-200 transition-colors"
+                    >
+                      <Trash2 size={14} className="text-red-500" />
+                    </button>
+                  </div>
                 </div>
               </div>
             )
