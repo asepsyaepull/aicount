@@ -5,6 +5,8 @@ import { useCategories } from '../../hooks/useCategories'
 import { useAppStore } from '../../stores/appStore'
 import { addBudget, useBudgets } from '../../hooks/useBudgets'
 import { formatInputCurrency, parseCurrency } from '../../utils/currency'
+import { AddCategoryModal } from '../category/AddCategoryModal'
+import { Plus } from 'lucide-react'
 
 interface AddBudgetModalProps {
   isOpen: boolean
@@ -20,6 +22,7 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
   const [newCategoryId, setNewCategoryId] = useState('')
   const [newAmount, setNewAmount] = useState('')
   const [saving, setSaving] = useState(false)
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false)
 
   if (!isOpen) return null
 
@@ -64,19 +67,42 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
 
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-text-secondary mb-1.5 block">Category</label>
-              <select
-                value={newCategoryId}
-                onChange={(e) => setNewCategoryId(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                <option value="">Select category</option>
+              <label className="text-xs font-medium text-text-secondary mb-2 block">Category</label>
+              <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1 -mx-1">
                 {availableCategories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
-                  </option>
+                  <button
+                    key={cat.id}
+                    onClick={() => setNewCategoryId(cat.id)}
+                    className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all ${
+                      newCategoryId === cat.id
+                        ? 'border-primary bg-primary-50 shadow-sm'
+                        : 'border-transparent bg-gray-50 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-xl">{cat.icon}</span>
+                    <span className="text-[10px] font-medium text-text-secondary truncate w-full text-center">
+                      {cat.name}
+                    </span>
+                  </button>
                 ))}
-              </select>
+                
+                {/* Add New Category Button */}
+                <button
+                  onClick={() => setIsAddCategoryOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1 p-2.5 rounded-xl border-2 border-dashed border-gray-300 bg-transparent hover:bg-gray-50 transition-all text-text-muted hover:text-primary active:scale-95"
+                >
+                  <Plus size={24} />
+                  <span className="text-[10px] font-medium truncate w-full text-center">
+                    Add New
+                  </span>
+                </button>
+                
+                {availableCategories.length === 0 && (
+                  <div className="col-span-3 text-center py-4 text-xs text-text-muted">
+                    No predefined categories left!
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
@@ -104,6 +130,12 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
           </div>
         </div>
       </div>
+      
+      <AddCategoryModal 
+        isOpen={isAddCategoryOpen}
+        onClose={() => setIsAddCategoryOpen(false)}
+        defaultType="expense"
+      />
     </>,
     document.body
   )

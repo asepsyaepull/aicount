@@ -23,6 +23,24 @@ function mapRow(c: CategoryRow): Category {
   }
 }
 
+interface InsertCategoryArgs {
+  familyId: string
+  name: string
+  type: 'income' | 'expense'
+  icon: string
+}
+
+export async function addCategory(args: InsertCategoryArgs) {
+  const { error } = await supabase.from('categories').insert({
+    family_id: args.familyId,
+    name: args.name,
+    type: args.type,
+    icon: args.icon,
+    is_default: false,
+  })
+  if (error) throw error
+}
+
 export function useCategories() {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const [categories, setCategories] = useState<Category[]>([])

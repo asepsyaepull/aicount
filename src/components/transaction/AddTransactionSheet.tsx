@@ -9,6 +9,8 @@ import { useAppStore } from '../../stores/appStore'
 import { formatInputCurrency, parseCurrency } from '../../utils/currency'
 import { SegmentedControl } from '../ui/SegmentedControl'
 import { DatePicker } from '../ui/DatePicker'
+import { AddCategoryModal } from '../category/AddCategoryModal'
+import { Plus } from 'lucide-react'
 
 export function AddTransactionSheet() {
   const isOpen = useAppStore((s) => s.isAddTransactionOpen)
@@ -25,6 +27,7 @@ export function AddTransactionSheet() {
   const [smartInput, setSmartInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [isAiLoading, setIsAiLoading] = useState(false)
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false)
 
   const { wallets } = useWallets()
   const allCategories = useCategories()
@@ -271,6 +274,17 @@ export function AddTransactionSheet() {
                     </span>
                   </button>
                 ))}
+                
+                {/* Add New Category Button */}
+                <button
+                  onClick={() => setIsAddCategoryOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1 p-2.5 rounded-xl border-2 border-dashed border-gray-300 bg-transparent hover:bg-gray-50 transition-all text-text-muted hover:text-primary active:scale-95"
+                >
+                  <Plus size={24} />
+                  <span className="text-[10px] font-medium truncate w-full text-center">
+                    Add New
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -327,6 +341,12 @@ export function AddTransactionSheet() {
           </div>
         </div>
       </div>
+
+      <AddCategoryModal
+        isOpen={isAddCategoryOpen}
+        onClose={() => setIsAddCategoryOpen(false)}
+        defaultType={type === 'transfer' ? 'expense' : type}
+      />
     </>,
     document.body
   )
