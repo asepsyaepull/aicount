@@ -50,19 +50,19 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-dvh max-w-md mx-auto bg-white p-6 relative overflow-hidden sm:shadow-2xl sm:border-x sm:border-gray-50">
-      {/* Decorative gradient blob */}
-      <div className="absolute -top-32 -left-32 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/4 -right-32 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="flex-1 flex flex-col justify-center animate-fade-in relative z-10">
-        <div className="mb-10 text-center">
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg shadow-primary/30">
-            ✨
-          </div>
-          <h1 className="text-3xl font-extrabold text-text mb-2">Welcome Back</h1>
-          <p className="text-text-muted text-sm">Sign in to manage your family finance</p>
+    <div className="flex flex-col min-h-dvh w-full max-w-md mx-auto bg-bg relative overflow-hidden sm:shadow-2xl sm:border-x sm:border-gray-50 animate-fade-in">
+      {/* Header */}
+      <div className="gradient-header px-5 pt-16 pb-24 rounded-b-3xl text-center shrink-0">
+        <div className="w-16 h-16 backdrop-blur-md rounded-2xl flex items-center justify-center text-white text-3xl mx-auto mb-4 shadow-lg border border-white/10">
+          <img src="/icons/icon-192x192.png" alt="Google" className="w-16 h-16" />
         </div>
+        <h1 className="text-3xl font-extrabold text-white mb-2">Welcome Back</h1>
+        <p className="text-white/80 text-sm">Sign in to manage your family finance</p>
+      </div>
+
+      {/* Form Container */}
+      <div className="flex-1 px-5 -mt-12 pb-8">
+        <div className="bg-white rounded-3xl p-6 shadow-xl shadow-black/5">
 
         {error && (
           <div className="p-3 mb-6 bg-red-50 text-red-500 text-sm rounded-xl border border-red-100 text-center">
@@ -128,21 +128,22 @@ export function LoginPage() {
           <span className="relative bg-white px-4 text-xs font-medium text-text-muted">OR CONTINUE WITH</span>
         </div>
 
-        <button
-          onClick={handleGoogleLogin}
-          type="button"
-          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white border border-gray-200 text-sm font-bold text-text hover:bg-gray-50 transition-colors shadow-sm"
-        >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-          Google
-        </button>
+          <button
+            onClick={handleGoogleLogin}
+            type="button"
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-white border border-gray-200 text-sm font-bold text-text hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+            Google
+          </button>
 
-        <p className="text-center text-sm text-text-muted mt-8">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-bold text-primary">
-            Sign Up
-          </Link>
-        </p>
+          <p className="text-center text-sm text-text-muted mt-8">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-bold text-primary">
+              Sign Up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )
