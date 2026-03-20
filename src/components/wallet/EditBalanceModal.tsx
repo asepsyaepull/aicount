@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Wallet, Banknote, CreditCard, Smartphone } from 'lucide-react'
 import { updateWallet, type Wallet as WalletType } from '../../hooks/useWallets'
 import { bankOptions, ewalletOptions } from '../../constants/wallet'
@@ -43,7 +44,7 @@ export function EditBalanceModal({ wallet, onClose }: EditBalanceModalProps) {
   const provider = [...bankOptions, ...ewalletOptions].find((p) => wallet.name.includes(p.name))
   const Icon = walletIcons[wallet.type] || Wallet
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
       <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
@@ -107,6 +108,7 @@ export function EditBalanceModal({ wallet, onClose }: EditBalanceModalProps) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

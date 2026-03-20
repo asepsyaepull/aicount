@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { walletTypes, walletColors, bankOptions, ewalletOptions } from '../../constants/wallet'
 import { addWallet } from '../../hooks/useWallets'
@@ -44,7 +45,7 @@ export function AddWalletModal({ isOpen, onClose }: AddWalletModalProps) {
     }
   }
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
       <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
@@ -175,6 +176,7 @@ export function AddWalletModal({ isOpen, onClose }: AddWalletModalProps) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

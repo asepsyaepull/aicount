@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useCategories } from '../../hooks/useCategories'
 import { useAppStore } from '../../stores/appStore'
@@ -46,7 +47,7 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
     }
   }
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
       <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
@@ -103,6 +104,7 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

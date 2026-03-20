@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Sparkles, X, Loader2 } from 'lucide-react'
 import { getFinancialAdvice } from '../../lib/gemini'
 import { useTransactions } from '../../hooks/useTransactions'
@@ -52,7 +53,7 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
     }
   }
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
       <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
@@ -78,7 +79,7 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
                 <p className="text-4xl mb-3">🤖</p>
                 <h4 className="text-base font-bold text-text mb-1">Butuh Saran Keuangan?</h4>
                 <p className="text-sm text-text-muted mb-6">
-                  Gemini AI akan menganalisis tren pengeluaran dan pemasukan Anda bulan ini untuk memberikan insight personal.
+                  Agent AI akan menganalisis tren pengeluaran dan pemasukan Anda bulan ini untuk memberikan insight personal.
                 </p>
                 <button
                   onClick={fetchAdvice}
@@ -93,7 +94,7 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
               <div className="flex flex-col items-center justify-center py-16">
                 <Loader2 size={32} className="text-primary animate-spin mb-4" />
                 <p className="text-sm font-medium text-text-secondary animate-pulse">
-                  Gemini sedang menganalisis data Anda...
+                  Aicount sedang menganalisis data Anda...
                 </p>
               </div>
             )}
@@ -122,7 +123,7 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
 
                 <button
                   onClick={onClose}
-                  className="w-full py-3 mt-6 rounded-xl bg-gray-100 text-text font-semibold text-sm hover:bg-gray-200"
+                  className="w-full py-3 mt-6 rounded-xl gradient-primary text-white font-semibold text-sm shadow-lg shadow-primary/25"
                 >
                   Selesai
                 </button>
@@ -131,6 +132,7 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

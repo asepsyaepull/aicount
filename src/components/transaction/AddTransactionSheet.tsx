@@ -1,5 +1,6 @@
 import { Camera, Loader2, Sparkles, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useCategories } from '../../hooks/useCategories'
 import { addTransaction } from '../../hooks/useTransactions'
 import { useWallets } from '../../hooks/useWallets'
@@ -164,7 +165,7 @@ export function AddTransactionSheet() {
 
   if (!isOpen) return null
 
-  return (
+  return createPortal(
     <>
       {/* Overlay */}
       <div className="fixed inset-0 z-60 overlay" onClick={close} />
@@ -199,7 +200,7 @@ export function AddTransactionSheet() {
                     if (e.key === 'Enter') handleSmartInputSubmit()
                   }}
                   disabled={isAiLoading}
-                  className="w-full pl-10 pr-12 py-3 bg-primary-50 rounded-xl text-sm border border-primary-100 focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-text-muted"
+                  className="w-full pl-10 pr-20 py-3 bg-primary-50 rounded-xl text-sm border border-primary-100 focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-text-muted"
                 />
                 <Sparkles size={18} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${isAiLoading ? 'text-primary animate-pulse' : 'text-primary'}`} />
 
@@ -210,7 +211,7 @@ export function AddTransactionSheet() {
                       disabled={isAiLoading}
                       className="p-2 rounded-lg bg-primary text-white hover:bg-primary-600 transition-colors text-[10px] font-bold"
                     >
-                      GO
+                      Generate
                     </button>
                   )}
                   <input
@@ -292,7 +293,7 @@ export function AddTransactionSheet() {
             </div>
 
             {/* Date & Note */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="text-xs font-medium text-text-secondary mb-1.5 block">Date</label>
                 <input
@@ -304,8 +305,8 @@ export function AddTransactionSheet() {
               </div>
               <div>
                 <label className="text-xs font-medium text-text-secondary mb-1.5 block">Note</label>
-                <input
-                  type="text"
+                <textarea
+                  rows={3}
                   placeholder="Add note..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
@@ -326,6 +327,7 @@ export function AddTransactionSheet() {
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
