@@ -1,19 +1,19 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useCategories } from '../hooks/useCategories'
-import { useAppStore } from '../stores/appStore'
+
 import { useBudgets, useTotalBudget } from '../hooks/useBudgets'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { CategoryBudgetCard } from '../components/ui/CategoryBudgetCard'
 import { SummaryStatCard } from '../components/ui/SummaryStatCard'
 import { AddBudgetModal } from '../components/budget/AddBudgetModal'
 import { formatCurrency } from '../utils/currency'
-import { calcPercentage, formatMonthYear } from '../utils/budget'
+import { calcPercentage } from '../utils/budget'
+import { MonthPicker } from '../components/ui/MonthPicker'
 
 export function BudgetPage() {
   const budgets = useBudgets()
   const { totalLimit, totalSpent } = useTotalBudget()
-  const selectedMonth = useAppStore((s) => s.selectedMonth)
   const percentage = totalLimit > 0 ? calcPercentage(totalSpent, totalLimit) : 0
 
   const categories = useCategories()
@@ -30,7 +30,7 @@ export function BudgetPage() {
         {/* Overall Budget Card */}
         <div className="bg-white rounded-2xl p-5 shadow-lg shadow-black/5">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-xs text-text-muted font-medium">{formatMonthYear(selectedMonth)}</p>
+            <MonthPicker colorVariant="gray" />
             <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
               percentage >= 100 ? 'bg-red-50 text-red-500' :
               percentage >= 80 ? 'bg-yellow-50 text-yellow-600' :

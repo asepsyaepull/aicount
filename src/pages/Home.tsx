@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Sparkles } from 'lucide-react'
+import { Bell, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useCurrentUser } from '../hooks/useUser'
 import { useCategories } from '../hooks/useCategories'
@@ -13,6 +13,7 @@ import { TransactionItem } from '../components/transaction/TransactionItem'
 import { formatCurrency } from '../utils/currency'
 import { calcPercentage } from '../utils/budget'
 import { AIAdvisor } from '../components/ai/AIAdvisor'
+import { MonthPicker } from '../components/ui/MonthPicker'
 
 export function HomePage() {
   const currentUser = useCurrentUser()
@@ -59,11 +60,7 @@ export function HomePage() {
         <div className="bg-white rounded-2xl p-5 shadow-lg shadow-black/5">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-medium text-text-secondary">Remaining Budget</p>
-            <button className="flex items-center gap-1 text-xs font-medium text-primary">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              This Month
-              <ChevronRight size={14} />
-            </button>
+            <MonthPicker colorVariant="primary" />
           </div>
           <p className="text-3xl font-extrabold text-text mb-3">
             Rp {formatCurrency(remaining > 0 ? remaining : 0)}
