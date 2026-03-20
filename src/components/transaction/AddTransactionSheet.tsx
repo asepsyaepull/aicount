@@ -8,6 +8,7 @@ import { parseReceiptImage, parseSmartInput } from '../../lib/gemini'
 import { useAppStore } from '../../stores/appStore'
 import { formatInputCurrency, parseCurrency } from '../../utils/currency'
 import { SegmentedControl } from '../ui/SegmentedControl'
+import { DatePicker } from '../ui/DatePicker'
 
 export function AddTransactionSheet() {
   const isOpen = useAppStore((s) => s.isAddTransactionOpen)
@@ -296,11 +297,10 @@ export function AddTransactionSheet() {
             <div className="grid grid-cols-1 gap-3">
               <div>
                 <label className="text-xs font-medium text-text-secondary mb-1.5 block">Date</label>
-                <input
-                  type="date"
+                <DatePicker
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-gray-50 rounded-xl text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  maxDate={new Date().toISOString().split('T')[0]} // Disable future dates
+                  onChange={setDate}
                 />
               </div>
               <div>
