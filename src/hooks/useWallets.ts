@@ -27,6 +27,7 @@ function mapRow(w: WalletRow): Wallet {
 
 export function useWallets() {
   const familyId = useAppStore((s) => s.currentFamilyId)
+  const refreshTrigger = useAppStore((s) => s.refreshTrigger)
   const [wallets, setWallets] = useState<Wallet[]>([])
 
   const fetchWallets = useCallback(async () => {
@@ -61,7 +62,7 @@ export function useWallets() {
       ignore = true
       supabase.removeChannel(channel)
     }
-  }, [familyId, fetchWallets])
+  }, [familyId, fetchWallets, refreshTrigger])
 
   const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0)
 

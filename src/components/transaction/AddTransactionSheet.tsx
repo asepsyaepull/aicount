@@ -145,6 +145,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
   }
 
   const addToast = useToastStore((s) => s.addToast)
+  const triggerRefresh = useAppStore((s) => s.triggerRefresh)
 
   const handleSave = async () => {
     if (!amount || !walletId || !currentUserId || !currentFamilyId) return
@@ -163,6 +164,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
       })
 
       addToast('Transaksi berhasil ditambahkan', 'success')
+      triggerRefresh()
       onSuccess?.()
       onClose()
       // Reset form

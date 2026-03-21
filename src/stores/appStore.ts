@@ -12,6 +12,9 @@ interface AppState {
   openAddTransaction: () => void
   closeAddTransaction: () => void
   openEditTransaction: (id: string) => void
+
+  refreshTrigger: number
+  triggerRefresh: () => void
 }
 
 const now = new Date()
@@ -29,4 +32,7 @@ export const useAppStore = create<AppState>((set) => ({
   openAddTransaction: () => set({ isAddTransactionOpen: true, editingTransactionId: null }),
   closeAddTransaction: () => set({ isAddTransactionOpen: false, editingTransactionId: null }),
   openEditTransaction: (id) => set({ isAddTransactionOpen: true, editingTransactionId: id }),
+
+  refreshTrigger: 0,
+  triggerRefresh: () => set((state) => ({ refreshTrigger: state.refreshTrigger + 1 })),
 }))

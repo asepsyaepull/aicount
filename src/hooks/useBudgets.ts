@@ -26,6 +26,7 @@ function mapRow(b: BudgetRow): Budget {
 export function useBudgets() {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const selectedMonth = useAppStore((s) => s.selectedMonth)
+  const refreshTrigger = useAppStore((s) => s.refreshTrigger)
   const [budgets, setBudgets] = useState<Budget[]>([])
 
   const fetchBudgets = useCallback(async () => {
@@ -65,7 +66,7 @@ export function useBudgets() {
       ignore = true
       supabase.removeChannel(channel)
     }
-  }, [familyId, fetchBudgets])
+  }, [familyId, fetchBudgets, refreshTrigger])
 
   return { budgets, refresh: fetchBudgets }
 }
@@ -73,6 +74,7 @@ export function useBudgets() {
 export function useTotalBudget() {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const selectedMonth = useAppStore((s) => s.selectedMonth)
+  const refreshTrigger = useAppStore((s) => s.refreshTrigger)
   const [data, setData] = useState({ totalLimit: 0, totalSpent: 0 })
 
   useEffect(() => {
@@ -126,7 +128,7 @@ export function useTotalBudget() {
       supabase.removeChannel(limitsChannel)
       supabase.removeChannel(spentChannel)
     }
-  }, [familyId, selectedMonth])
+  }, [familyId, selectedMonth, refreshTrigger])
 
   return data
 }

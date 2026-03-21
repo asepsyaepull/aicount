@@ -34,6 +34,7 @@ function mapRow(t: TransactionRow): Transaction {
 export function useTransactions(limit?: number) {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const selectedMonth = useAppStore((s) => s.selectedMonth)
+  const refreshTrigger = useAppStore((s) => s.refreshTrigger)
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
   const fetchTransactions = useCallback(async () => {
@@ -87,7 +88,7 @@ export function useTransactions(limit?: number) {
       ignore = true;
       supabase.removeChannel(channel)
     }
-  }, [familyId, fetchTransactions])
+  }, [familyId, fetchTransactions, refreshTrigger])
 
   const totalIncome = transactions.filter((t) => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)
   const totalExpense = transactions.filter((t) => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
@@ -104,6 +105,7 @@ export function useTransactions(limit?: number) {
 export function useTransactionsByCategory(categoryId: string) {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const selectedMonth = useAppStore((s) => s.selectedMonth)
+  const refreshTrigger = useAppStore((s) => s.refreshTrigger)
   const [spent, setSpent] = useState(0)
 
   useEffect(() => {
@@ -142,7 +144,7 @@ export function useTransactionsByCategory(categoryId: string) {
       ignore = true
       supabase.removeChannel(channel)
     }
-  }, [familyId, categoryId, selectedMonth])
+  }, [familyId, categoryId, selectedMonth, refreshTrigger])
 
   return spent
 }
