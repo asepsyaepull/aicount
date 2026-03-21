@@ -3,6 +3,7 @@ import { X, Pencil, Trash2, Calendar, Wallet, FileText, Tag } from 'lucide-react
 import { formatCurrency } from '../../utils/currency'
 import { deleteTransaction, type Transaction } from '../../hooks/useTransactions'
 import { useState } from 'react'
+import { DestructiveModal } from '../ui/DestructiveModal'
 
 interface TransactionDetailsModalProps {
   isOpen: boolean
@@ -24,14 +25,13 @@ export function TransactionDetailsModal({
   onEdit,
 }: TransactionDetailsModalProps) {
   const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   if (!isOpen || !transaction) return null
 
   const isIncome = transaction.type === 'income'
 
-  const handleDelete = async () => {
-    if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini? Data tidak dapat dikembalikan.')) return
-    
+  const executeDelete = async () => {
     setDeleting(true)
     try {
       await deleteTransaction(transaction.id)
@@ -41,7 +41,12 @@ export function TransactionDetailsModal({
       alert('Gagal menghapus transaksi')
     } finally {
       setDeleting(false)
+      setShowDeleteConfirm(false)
     }
+  }
+
+  const handleDelete = () => {
+    setShowDeleteConfirm(true)
   }
 
   return createPortal(
@@ -140,11 +145,19 @@ export function TransactionDetailsModal({
             className="w-full mt-6 py-3.5 rounded-xl bg-red-50 text-red-500 font-bold flex items-center justify-center gap-2 hover:bg-red-100 transition-colors disabled:opacity-50"
           >
             <Trash2 size={18} />
-            {deleting ? 'Menghapus...' : 'Hapus Transaksi'}
+            Hapus Transaksi
           </button>
           </div>
         </div>
       </div>
+      <DestructiveModal
+        isOpen={showDeleteConfirm}
+        title="Hapus Transaksi"
+        description="Apakah Anda yakin ingin menghapus transaksi ini? Data tidak dapat dikembalikan."
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={executeDelete}
+        isLoading={deleting}
+      />
     </>,
     document.body
   )

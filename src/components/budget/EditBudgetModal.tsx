@@ -4,6 +4,7 @@ import { X, Trash2 } from 'lucide-react'
 import { updateBudget, deleteBudget, type Budget } from '../../hooks/useBudgets'
 import type { Category } from '../../hooks/useCategories'
 import { formatCurrency, formatInputCurrency, parseCurrency } from '../../utils/currency'
+import { DestructiveModal } from '../ui/DestructiveModal'
 
 interface EditBudgetModalProps {
   budget: Budget | null
@@ -16,6 +17,7 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
   const [amountLimit, setAmountLimit] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Initialize form when a budget is passed
   useEffect(() => {
@@ -40,8 +42,7 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
     }
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Hapus budget ini?')) return
+  const executeDelete = async () => {
     setDeleting(true)
     try {
       await deleteBudget(budget.id)
@@ -52,7 +53,12 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
       alert('Gagal menghapus budget')
     } finally {
       setDeleting(false)
+      setShowDeleteConfirm(false)
     }
+  }
+
+  const handleDelete = () => {
+    setShowDeleteConfirm(true)
   }
 
   return createPortal(
@@ -118,6 +124,14 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
           </div>
         </div>
       </div>
+      <DestructiveModal
+        isOpen={showDeleteConfirm}
+        title="Hapus Budget"
+        description="Apakah Anda yakin ingin menghapus budget ini?"
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={executeDelete}
+        isLoading={deleting}
+      />
     </>,
     document.body
   )

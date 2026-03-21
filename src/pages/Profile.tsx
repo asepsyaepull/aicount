@@ -8,6 +8,7 @@ import { AddWalletModal } from '../components/wallet/AddWalletModal'
 import { EditBalanceModal } from '../components/wallet/EditBalanceModal'
 import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { AIAdvisor } from '../components/ai/AIAdvisor'
+import { DestructiveModal } from '../components/ui/DestructiveModal'
 import { bankOptions, ewalletOptions } from '../constants/wallet'
 
 const menuItems = [
@@ -103,8 +104,8 @@ export function ProfilePage() {
               </span>
             </div>
             <button
-               onClick={() => setShowEditProfile(true)}
-               className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"
+              onClick={() => setShowEditProfile(true)}
+              className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"
             >
               <Settings size={18} className="text-text-secondary" />
             </button>
@@ -256,43 +257,20 @@ export function ProfilePage() {
       {/* ═══════════════════════════════════════ */}
       {/* DELETE CONFIRM MODAL */}
       {/* ═══════════════════════════════════════ */}
-      {deletingId && (
-        <>
-          <div className="fixed inset-0 z-60 overlay" onClick={() => setDeletingId(null)} />
-          <div className="fixed inset-0 z-70 flex items-center justify-center p-6">
-            <div className="max-w-sm w-full bg-white rounded-2xl shadow-2xl p-5 animate-fade-in">
-              <div className="text-center mb-4">
-                <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
-                  <Trash2 size={24} className="text-red-500" />
-                </div>
-                <h3 className="text-lg font-bold text-text">Delete Wallet?</h3>
-                <p className="text-sm text-text-muted mt-1">
-                  All transactions linked to this wallet will also be removed. This action cannot be undone.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setDeletingId(null)}
-                  className="flex-1 py-3 rounded-xl bg-gray-100 text-text font-semibold text-sm hover:bg-gray-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDeleteWallet(deletingId)}
-                  className="flex-1 py-3 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <DestructiveModal
+        isOpen={!!deletingId}
+        title="Delete Wallet?"
+        description="All transactions linked to this wallet will also be removed. This action cannot be undone."
+        onClose={() => setDeletingId(null)}
+        onConfirm={() => deletingId && handleDeleteWallet(deletingId)}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
 
       {/* Wallet Modals */}
       <AddWalletModal isOpen={showAddWallet} onClose={() => setShowAddWallet(false)} onSuccess={refresh} />
       <EditBalanceModal wallet={editingWallet} onClose={() => setEditingWallet(null)} onSuccess={refresh} />
-      
+
       {/* Profile & Settings Modals */}
       <EditProfileModal user={currentUser} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSuccess={refreshUser} />
       <AIAdvisor isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
