@@ -75,20 +75,22 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
 
           <div className="px-4 pb-6 space-y-4">
             {!hasFetched && !loading && (
-              <div className="flex flex-col items-center text-center py-10">
-                <p className="text-4xl mb-3">🤖</p>
-                <h4 className="text-base font-bold text-text mb-1">Butuh Saran Keuangan?</h4>
-                <p className="text-sm text-text-muted mb-6">
-                  Agent AI akan menganalisis tren pengeluaran dan pemasukan Anda bulan ini untuk memberikan insight personal.
-                </p>
+              <div className="flex flex-col gap-8 pt-10">
+                <div className="flex flex-col items-center text-center">
+                  <p className="text-4xl mb-3">🤖</p>
+                  <h4 className="text-base font-bold text-text mb-1">Butuh Saran Keuangan?</h4>
+                  <p className="text-sm text-text-muted mb-6">
+                    Agent AI akan menganalisis tren pengeluaran dan pemasukan Anda bulan ini untuk memberikan insight personal.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchAdvice}
+                  className="w-full py-3.5 rounded-xl gradient-primary text-white font-semibold text-sm shadow-lg shadow-primary/25"
+                >
+                  Analisis Keuangan Saya
+                </button>
               </div>
             )}
-            <button
-              onClick={fetchAdvice}
-              className="w-full py-3.5 rounded-xl gradient-primary text-white font-semibold text-sm shadow-lg shadow-primary/25"
-            >
-              Analisis Keuangan Saya
-            </button>
 
             {loading && (
               <div className="flex flex-col items-center justify-center py-16">
