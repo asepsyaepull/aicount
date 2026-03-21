@@ -13,12 +13,28 @@ import { TransactionsPage } from './pages/Transactions'
 import { useAppStore } from './stores/appStore'
 import type { Session } from './types/supabase'
 import { ToastContainer } from './components/ui/ToastContainer'
+import { useToastStore } from './stores/toastStore'
 
 function App() {
   const [isReady, setIsReady] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
   const setCurrentUser = useAppStore((s) => s.setCurrentUser)
+  const addToast = useToastStore((s) => s.addToast)
+
+  // Handle Online/Offline Status for PWA
+  useEffect(() => {
+    const handleOnline = () => addToast('Kembali online! Anda sudah terhubung ke internet.', 'success')
+    const handleOffline = () => addToast('Sedang offline. Sebagian fitur mungkin tidak tersedia.', 'error')
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [addToast])
 
   useEffect(() => {
     async function fetchUserProfile(userId: string) {

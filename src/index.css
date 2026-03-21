@@ -28,6 +28,13 @@
 /* Base styles */
 * {
   -webkit-tap-highlight-color: transparent;
+  user-select: none; /* Prevent accidental text highlighting on mobile */
+  -webkit-user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: auto;
+  -webkit-user-select: auto;
 }
 
 html {

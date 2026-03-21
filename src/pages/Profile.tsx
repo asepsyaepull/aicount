@@ -10,6 +10,7 @@ import { EditProfileModal } from '../components/profile/EditProfileModal'
 import { AIAdvisor } from '../components/ai/AIAdvisor'
 import { DestructiveModal } from '../components/ui/DestructiveModal'
 import { bankOptions, ewalletOptions } from '../constants/wallet'
+import { useInstallPrompt } from '../hooks/useInstallPrompt'
 
 const menuItems = [
   { icon: Bell, label: 'Notifications', subtitle: 'Manage alerts' },
@@ -54,6 +55,8 @@ export function ProfilePage() {
     }
     fetchInviteCode()
   }, [currentUser])
+
+  const { isInstallable, promptInstall } = useInstallPrompt()
 
   const walletIcons: Record<string, typeof Wallet> = {
     cash: Banknote,
@@ -240,6 +243,24 @@ export function ProfilePage() {
           ))}
         </div>
       </div>
+
+      {/* PWA Install Banner */}
+      {isInstallable && (
+        <div className="px-5 mt-4">
+          <div className="bg-primary-50 rounded-2xl p-4 border border-primary-100 flex items-center justify-between shadow-sm">
+            <div>
+              <p className="text-sm font-bold text-primary">Install Aicount App</p>
+              <p className="text-[10px] text-text-secondary mt-0.5">Get faster access & native feel</p>
+            </div>
+            <button 
+              onClick={promptInstall}
+              className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl shadow-md shadow-primary/20 hover:bg-primary-dark transition-colors"
+            >
+              Install
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Logout */}
       <div className="px-5 mt-4 mb-8">

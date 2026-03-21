@@ -17,8 +17,25 @@ export default defineConfig({
         theme_color: '#2A9D8F',
         background_color: '#F0FDFB',
         display: 'standalone',
+        orientation: 'portrait',
         scope: '/',
         start_url: '/',
+        shortcuts: [
+          {
+            name: "New Transaction",
+            short_name: "Transaction",
+            description: "Add a new transaction",
+            url: "/",
+            icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }]
+          },
+          {
+            name: "View Dashboard",
+            short_name: "Dashboard",
+            description: "Open Aicount Dashboard",
+            url: "/",
+            icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }]
+          }
+        ],
         icons: [
           {
             src: '/icons/icon-192x192.png',
