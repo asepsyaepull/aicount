@@ -11,6 +11,7 @@ import { SegmentedControl } from '../ui/SegmentedControl'
 import { DatePicker } from '../ui/DatePicker'
 import { AddCategoryModal } from '../category/AddCategoryModal'
 import { Plus } from 'lucide-react'
+import { useToastStore } from '../../stores/toastStore'
 
 export interface AddTransactionSheetProps {
   isOpen: boolean
@@ -143,6 +144,8 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
     }
   }
 
+  const addToast = useToastStore((s) => s.addToast)
+
   const handleSave = async () => {
     if (!amount || !walletId || !currentUserId || !currentFamilyId) return
     setSaving(true)
@@ -159,6 +162,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
         note: note || '',
       })
 
+      addToast('Transaksi berhasil ditambahkan', 'success')
       onSuccess?.()
       onClose()
       // Reset form
@@ -167,6 +171,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
       setSmartInput('')
     } catch (err) {
       console.error('Failed to save transaction:', err)
+      addToast('Gagal menyimpan transaksi', 'error')
     } finally {
       setSaving(false)
     }

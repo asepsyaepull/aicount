@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { addCategory } from '../../hooks/useCategories'
+import { useToastStore } from '../../stores/toastStore'
 
 interface AddCategoryModalProps {
   isOpen: boolean
@@ -24,6 +25,8 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, defaultType = 'ex
   const [icon, setIcon] = useState('📦')
   const [saving, setSaving] = useState(false)
 
+  const addToast = useToastStore((s) => s.addToast)
+
   if (!isOpen) return null
 
   const handleSave = async () => {
@@ -36,13 +39,14 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, defaultType = 'ex
         type,
         icon,
       })
+      addToast('Kategori berhasil ditambahkan', 'success')
       onSuccess?.()
       onClose()
       setName('')
       setIcon('📦')
     } catch (err) {
       console.error('Failed to add category:', err)
-      alert('Gagal menambahkan kategori.')
+      addToast('Gagal menambahkan kategori.', 'error')
     } finally {
       setSaving(false)
     }

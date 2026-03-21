@@ -8,6 +8,7 @@ import { formatInputCurrency, parseCurrency } from '../../utils/currency'
 import { SegmentedControl } from '../ui/SegmentedControl'
 import { DatePicker } from '../ui/DatePicker'
 import { AddCategoryModal } from '../category/AddCategoryModal'
+import { useToastStore } from '../../stores/toastStore'
 
 interface EditTransactionSheetProps {
   transaction: Transaction | null
@@ -59,6 +60,8 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
     setAmount(formatInputCurrency(raw))
   }, [])
 
+  const addToast = useToastStore((s) => s.addToast)
+
   const handleSave = async () => {
     if (!transaction || !amount || !walletId) return
     setSaving(true)
@@ -73,11 +76,12 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
         note: note || '',
       })
 
+      addToast('Perubahan transaksi tersimpan', 'success')
       onSuccess?.()
       onClose()
     } catch (err) {
       console.error('Failed to update transaction:', err)
-      alert('Gagal menyimpan perubahan transaksi')
+      addToast('Gagal menyimpan perubahan transaksi', 'error')
     } finally {
       setSaving(false)
     }

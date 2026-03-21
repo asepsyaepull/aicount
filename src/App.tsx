@@ -12,6 +12,7 @@ import { StatisticsPage } from './pages/Statistics'
 import { TransactionsPage } from './pages/Transactions'
 import { useAppStore } from './stores/appStore'
 import type { Session } from './types/supabase'
+import { ToastContainer } from './components/ui/ToastContainer'
 
 function App() {
   const [isReady, setIsReady] = useState(false)
@@ -97,6 +98,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   )
 }
