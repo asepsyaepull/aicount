@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase'
 import { formatCurrency } from '../utils/currency'
 import { AddWalletModal } from '../components/wallet/AddWalletModal'
 import { EditBalanceModal } from '../components/wallet/EditBalanceModal'
+import { EditProfileModal } from '../components/profile/EditProfileModal'
+import { AIAdvisor } from '../components/ai/AIAdvisor'
 import { bankOptions, ewalletOptions } from '../constants/wallet'
 
 const menuItems = [
@@ -19,19 +21,21 @@ const menuItems = [
 
 
 export function ProfilePage() {
-  const currentUser = useCurrentUser()
-  const { wallets, totalBalance } = useWallets()
+  const { user: currentUser, refresh: refreshUser } = useCurrentUser()
+  const { wallets, totalBalance, refresh } = useWallets()
 
   // Modal States
+  const [showEditProfile, setShowEditProfile] = useState(false)
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false)
   const [showAddWallet, setShowAddWallet] = useState(false)
   const [editingWallet, setEditingWallet] = useState<WalletType | null>(null)
-  
+
   // Delete confirm
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // Family Invite Code
   const [inviteCode, setInviteCode] = useState<string>('')
-  
+
   // Fetch Invite Code
   useEffect(() => {
     async function fetchInviteCode() {
@@ -60,6 +64,7 @@ export function ProfilePage() {
     try {
       await deleteWallet(id)
       setDeletingId(null)
+      refresh()
     } catch (err) {
       console.error('Failed to delete wallet:', err)
     }
@@ -67,6 +72,13 @@ export function ProfilePage() {
 
   const openEditBalance = (wallet: WalletType) => {
     setEditingWallet(wallet)
+  }
+
+  const handleMenuClick = (label: string) => {
+    if (label === 'AI Advisor') setIsAdvisorOpen(true)
+    else if (label === 'Notifications' || label === 'Security' || label === 'Help & Support') {
+      alert('Fitur ini sedang dalam pengembangan (Coming Soon) 🚀')
+    }
   }
 
   return (
@@ -90,7 +102,10 @@ export function ProfilePage() {
                 {currentUser?.role === 'admin' ? 'Admin' : 'Member'}
               </span>
             </div>
-            <button className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center">
+            <button
+               onClick={() => setShowEditProfile(true)}
+               className="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors"
+            >
               <Settings size={18} className="text-text-secondary" />
             </button>
           </div>
@@ -139,12 +154,13 @@ export function ProfilePage() {
             const provider = [...bankOptions, ...ewalletOptions].find(p => wallet.name.includes(p.name))
 
             return (
-              <div key={wallet.id} className="relative rounded-xl overflow-hidden shadow-sm border border-gray-50 bg-gray-50/50">
-                <div className="relative flex overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {/* Main Card (100% width) */}
-                  <div className="w-full shrink-0 snap-center bg-white flex items-center gap-3 p-3.5 border-transparent">
+              <div key={wallet.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col gap-3 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 opacity-5" style={{ backgroundColor: wallet.color, filter: 'blur(20px)' }} />
+
+                <div className="flex items-start justify-between z-10">
+                  <div className="flex items-center gap-3">
                     {provider ? (
-                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1.5 shadow-sm">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 shadow-sm">
                         <img src={provider.logo.replace(/^public\//, '/')} alt={provider.name} className="max-h-full max-w-full object-contain" />
                       </div>
                     ) : (
@@ -155,30 +171,35 @@ export function ProfilePage() {
                         <WalletIcon size={20} style={{ color: wallet.color || '#2A9D8F' }} />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-text truncate">{wallet.name}</p>
-                      <p className="text-[11px] text-text-muted capitalize">{wallet.type}</p>
+                    <div>
+                      <p className="text-sm font-bold text-text truncate">{wallet.name}</p>
+                      <p className="text-[11px] font-medium text-text-muted capitalize">{wallet.type}</p>
                     </div>
-                    <p className={`text-sm font-bold mr-1 ${wallet.balance >= 0 ? 'text-text' : 'text-red-500'}`}>
-                      Rp {formatCurrency(wallet.balance)}
-                    </p>
                   </div>
 
-                  {/* Accessible Actions Layer at the end of scroll */}
-                  <div className="shrink-0 snap-end flex items-center gap-1.5 px-3 bg-gray-50/50 border-l border-gray-100">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openEditBalance(wallet)}
-                      className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center active:bg-primary-200 transition-colors"
+                      className="p-2 rounded-lg bg-gray-50 text-text-secondary hover:bg-gray-100 transition-colors"
+                      title="Edit Balance"
                     >
-                      <Pencil size={14} className="text-primary-700" />
+                      <Pencil size={14} />
                     </button>
                     <button
                       onClick={() => setDeletingId(wallet.id)}
-                      className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center active:bg-red-200 transition-colors"
+                      className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                      title="Delete Wallet"
                     >
-                      <Trash2 size={14} className="text-red-500" />
+                      <Trash2 size={14} />
                     </button>
                   </div>
+                </div>
+
+                <div className="pt-1 z-10">
+                  <p className="text-[11px] font-semibold text-text-muted mb-0.5 uppercase tracking-wider">Balance</p>
+                  <p className={`text-xl font-extrabold ${wallet.balance >= 0 ? 'text-text' : 'text-red-500'}`}>
+                    Rp {formatCurrency(wallet.balance)}
+                  </p>
                 </div>
               </div>
             )
@@ -202,6 +223,7 @@ export function ProfilePage() {
             <button
               key={item.label}
               disabled={item.disabled}
+              onClick={() => handleMenuClick(item.label)}
               className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors ${i > 0 ? 'border-t border-gray-50' : ''
                 } ${item.disabled ? 'opacity-40' : ''}`}
             >
@@ -268,8 +290,12 @@ export function ProfilePage() {
       )}
 
       {/* Wallet Modals */}
-      <AddWalletModal isOpen={showAddWallet} onClose={() => setShowAddWallet(false)} />
-      <EditBalanceModal wallet={editingWallet} onClose={() => setEditingWallet(null)} />
+      <AddWalletModal isOpen={showAddWallet} onClose={() => setShowAddWallet(false)} onSuccess={refresh} />
+      <EditBalanceModal wallet={editingWallet} onClose={() => setEditingWallet(null)} onSuccess={refresh} />
+      
+      {/* Profile & Settings Modals */}
+      <EditProfileModal user={currentUser} isOpen={showEditProfile} onClose={() => setShowEditProfile(false)} onSuccess={refreshUser} />
+      <AIAdvisor isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
     </div>
   )
 }

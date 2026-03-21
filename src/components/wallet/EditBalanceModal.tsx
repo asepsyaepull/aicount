@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react'
+import { Banknote, CreditCard, Smartphone, Wallet, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Wallet, Banknote, CreditCard, Smartphone } from 'lucide-react'
-import { updateWallet, type Wallet as WalletType } from '../../hooks/useWallets'
 import { bankOptions, ewalletOptions } from '../../constants/wallet'
+import { updateWallet, type Wallet as WalletType } from '../../hooks/useWallets'
 import { formatCurrency, formatInputCurrency, parseCurrency } from '../../utils/currency'
 
 interface EditBalanceModalProps {
   wallet: WalletType | null
   onClose: () => void
+  onSuccess?: () => void
 }
 
 const walletIcons: Record<string, typeof Wallet> = {
@@ -16,7 +17,7 @@ const walletIcons: Record<string, typeof Wallet> = {
   ewallet: Smartphone,
 }
 
-export function EditBalanceModal({ wallet, onClose }: EditBalanceModalProps) {
+export function EditBalanceModal({ wallet, onClose, onSuccess }: EditBalanceModalProps) {
   const [editBalance, setEditBalance] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -33,6 +34,7 @@ export function EditBalanceModal({ wallet, onClose }: EditBalanceModalProps) {
     setSaving(true)
     try {
       await updateWallet(wallet.id, { balance: parseCurrency(editBalance) })
+      onSuccess?.()
       onClose()
     } catch (err) {
       console.error('Failed to update balance:', err)
@@ -62,7 +64,7 @@ export function EditBalanceModal({ wallet, onClose }: EditBalanceModalProps) {
           <div className="space-y-4">
             <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
               {provider ? (
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 p-1.5 shadow-sm">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-gray-100 shadow-sm">
                   <img
                     src={provider.logo.replace(/^public\//, '/')}
                     alt={provider.name}

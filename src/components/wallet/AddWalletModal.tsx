@@ -9,9 +9,10 @@ import { formatInputCurrency, parseCurrency } from '../../utils/currency'
 interface AddWalletModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export function AddWalletModal({ isOpen, onClose }: AddWalletModalProps) {
+export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalProps) {
   const currentFamilyId = useAppStore((s) => s.currentFamilyId)
 
   const [newName, setNewName] = useState('')
@@ -33,6 +34,7 @@ export function AddWalletModal({ isOpen, onClose }: AddWalletModalProps) {
         balance: parseCurrency(newBalance) || 0,
         color: newColor,
       })
+      onSuccess?.()
       onClose()
       setNewName('')
       setNewBalance('')
@@ -122,7 +124,7 @@ export function AddWalletModal({ isOpen, onClose }: AddWalletModalProps) {
                           : 'border-transparent bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
-                      <div className="w-10 h-6 flex items-center justify-center bg-white rounded shrink-0">
+                      <div className="w-8 h-8 flex items-center justify-center bg-white rounded shrink-0">
                         <img src={provider.logo} alt={provider.name} className="max-h-full max-w-full object-contain" />
                       </div>
                       <span className="text-[11px] font-semibold text-text truncate">{provider.name}</span>

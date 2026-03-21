@@ -7,17 +7,20 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { CategoryBudgetCard } from '../components/ui/CategoryBudgetCard'
 import { SummaryStatCard } from '../components/ui/SummaryStatCard'
 import { AddBudgetModal } from '../components/budget/AddBudgetModal'
+import { EditBudgetModal } from '../components/budget/EditBudgetModal'
 import { formatCurrency } from '../utils/currency'
+import type { Budget } from '../hooks/useBudgets'
 import { calcPercentage } from '../utils/budget'
 import { MonthPicker } from '../components/ui/MonthPicker'
 
 export function BudgetPage() {
-  const budgets = useBudgets()
+  const { budgets, refresh: refreshBudgets } = useBudgets()
   const { totalLimit, totalSpent } = useTotalBudget()
   const percentage = totalLimit > 0 ? calcPercentage(totalSpent, totalLimit) : 0
 
-  const categories = useCategories()
-  const [showAddModal, setShowAddModal] = useState(false)
+  const { categories } = useCategories()
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
 
   return (
     <div className="animate-fade-in">
@@ -49,16 +52,14 @@ export function BudgetPage() {
 
           <ProgressBar percentage={percentage} height="h-3" />
 
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="mt-4">
             <SummaryStatCard 
-              title="Total Budget" 
-              amount={totalLimit} 
-              colorVariant="primary" 
-            />
-            <SummaryStatCard 
-              title="Total Spent" 
-              amount={totalSpent} 
-              colorVariant="red" 
+              leftTitle="Total Budget" 
+              leftAmount={totalLimit} 
+              leftColorClass="text-text"
+              rightTitle="Total Spent" 
+              rightAmount={totalSpent} 
+              rightColorClass="text-red-500" 
             />
           </div>
         </div>
@@ -69,7 +70,7 @@ export function BudgetPage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-bold text-text">Category Budgets</h2>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setIsAddOpen(true)}
             className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary-50 px-3 py-1.5 rounded-lg"
           >
             <Plus size={14} />
@@ -85,6 +86,7 @@ export function BudgetPage() {
               amountLimit={budget.amountLimit}
               category={categories.find(c => c.id === budget.categoryId) || null} 
               variant="list"
+              onEdit={() => setEditingBudget(budget)}
             />
           ))}
 
@@ -98,8 +100,14 @@ export function BudgetPage() {
         </div>
       </div>
 
-      {/* Add Budget Modal */}
-      <AddBudgetModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+      {/* Modals */}
+      <AddBudgetModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onSuccess={refreshBudgets} />
+      <EditBudgetModal 
+        budget={editingBudget} 
+        category={editingBudget ? categories.find(c => c.id === editingBudget.categoryId) || null : null}
+        onClose={() => setEditingBudget(null)}
+        onSuccess={refreshBudgets}
+      />
     </div>
   )
 }

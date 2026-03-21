@@ -8,7 +8,7 @@ import { SimpleBarChart } from '../components/ui/SimpleBarChart'
 
 export function StatisticsPage() {
   const { totalIncome, totalExpense, allTransactions } = useTransactions()
-  const categories = useCategories()
+  const { categories } = useCategories()
 
   const balance = totalIncome - totalExpense
 
@@ -70,18 +70,16 @@ export function StatisticsPage() {
             Rp {formatCurrency(Math.abs(balance))}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="mt-4">
             <SummaryStatCard 
-              title="Income" 
-              amount={totalIncome} 
-              colorVariant="emerald" 
-              icon={<ArrowDownLeft size={12} className="text-emerald-500" />}
-            />
-            <SummaryStatCard 
-              title="Expense" 
-              amount={totalExpense} 
-              colorVariant="red"
-              icon={<ArrowUpRight size={12} className="text-red-500" />}
+              leftTitle="Income" 
+              leftAmount={totalIncome} 
+              leftColorClass="text-emerald-500"
+              leftIcon={<ArrowDownLeft size={12} className="text-emerald-500" />}
+              rightTitle="Expense" 
+              rightAmount={totalExpense} 
+              rightColorClass="text-red-500"
+              rightIcon={<ArrowUpRight size={12} className="text-red-500" />}
             />
           </div>
         </div>

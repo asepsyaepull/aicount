@@ -6,13 +6,18 @@ import { formatCurrency } from '../utils/currency'
 import { SummaryStatCard } from '../components/ui/SummaryStatCard'
 import { TransactionItem } from '../components/transaction/TransactionItem'
 import { TransactionFilters, type TransactionFilterType } from '../components/transaction/TransactionFilters'
+import { TransactionDetailsModal } from '../components/transaction/TransactionDetailsModal'
+import { EditTransactionSheet } from '../components/transaction/EditTransactionSheet'
+import type { Transaction } from '../hooks/useTransactions'
 
 export function TransactionsPage() {
-  const { allTransactions, totalIncome, totalExpense } = useTransactions()
+  const { allTransactions, totalIncome, totalExpense, refresh: refreshTransactions } = useTransactions()
   const [filter, setFilter] = useState<TransactionFilterType>('all')
   const [search, setSearch] = useState('')
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
-  const categories = useCategories()
+  const { categories } = useCategories()
   const { wallets } = useWallets()
 
   const getCategoryName = (catId: string) => categories.find((c) => c.id === catId)?.name || ''
@@ -57,18 +62,16 @@ export function TransactionsPage() {
             Rp {formatCurrency(totalIncome - totalExpense)}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 mt-4">
-            <SummaryStatCard 
-              title="Total Income" 
-              amount={totalIncome} 
-              prefix="+" 
-              colorVariant="emerald" 
-            />
-            <SummaryStatCard 
-              title="Total Expense" 
-              amount={totalExpense} 
-              prefix="-" 
-              colorVariant="red" 
+          <div className="mt-4">
+            <SummaryStatCard
+              leftTitle="Total Income"
+              leftAmount={totalIncome}
+              leftPrefix="+"
+              leftColorClass="text-emerald-500"
+              rightTitle="Total Expense"
+              rightAmount={totalExpense}
+              rightPrefix="-"
+              rightColorClass="text-red-500"
             />
           </div>
         </div>
@@ -95,6 +98,7 @@ export function TransactionsPage() {
                   categoryIcon={getCategoryIcon(tx.categoryId)}
                   categoryName={getCategoryName(tx.categoryId)}
                   walletName={getWalletName(tx.walletId)}
+                  onClick={(t) => setSelectedTx(t)}
                 />
               ))}
             </div>
@@ -108,6 +112,26 @@ export function TransactionsPage() {
           </div>
         )}
       </div>
+
+      <TransactionDetailsModal
+        isOpen={!!selectedTx && !isEditOpen}
+        transaction={selectedTx}
+        categoryName={selectedTx ? getCategoryName(selectedTx.categoryId) : ''}
+        categoryIcon={selectedTx ? getCategoryIcon(selectedTx.categoryId) : ''}
+        walletName={selectedTx ? getWalletName(selectedTx.walletId) : ''}
+        onClose={() => setSelectedTx(null)}
+        onEdit={() => setIsEditOpen(true)}
+      />
+
+      <EditTransactionSheet
+        transaction={selectedTx}
+        isOpen={isEditOpen}
+        onClose={() => {
+          setIsEditOpen(false)
+          setSelectedTx(null)
+        }}
+        onSuccess={refreshTransactions}
+      />
     </div>
   )
 }

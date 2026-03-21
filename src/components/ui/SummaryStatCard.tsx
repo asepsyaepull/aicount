@@ -2,49 +2,44 @@ import type { ReactNode } from 'react'
 import { formatCurrency } from '../../utils/currency'
 
 interface SummaryStatCardProps {
-  title: string
-  amount: number | string
-  prefix?: string
-  colorVariant: 'primary' | 'emerald' | 'red' | 'blue'
-  icon?: ReactNode
+  leftTitle: string
+  leftAmount: number | string
+  leftPrefix?: string
+  leftColorClass?: string
+  leftIcon?: ReactNode
+  
+  rightTitle: string
+  rightAmount: number | string
+  rightPrefix?: string
+  rightColorClass?: string
+  rightIcon?: ReactNode
 }
 
-export function SummaryStatCard({ title, amount, prefix = '', colorVariant, icon }: SummaryStatCardProps) {
-  const variants = {
-    primary: {
-      bg: 'bg-primary-50',
-      text: 'text-primary'
-    },
-    emerald: {
-      bg: 'bg-emerald-50',
-      text: 'text-emerald-600'
-    },
-    red: {
-      bg: 'bg-red-50',
-      text: 'text-red-500'
-    },
-    blue: {
-      bg: 'bg-blue-50',
-      text: 'text-blue-500'
-    }
-  }
-
-  const styles = variants[colorVariant]
-
+export function SummaryStatCard({ 
+  leftTitle, leftAmount, leftPrefix = '', leftColorClass = 'text-text', leftIcon,
+  rightTitle, rightAmount, rightPrefix = '', rightColorClass = 'text-text', rightIcon
+}: SummaryStatCardProps) {
   return (
-    <div className={`${styles.bg} rounded-xl p-3 text-center flex flex-col items-center justify-center`}>
-      {icon && (
-        <div className="flex items-center gap-1 mb-0.5">
-          {icon}
-          <span className="text-[10px] text-text-muted font-medium">{title}</span>
+    <div className="w-full py-3 rounded-xl border border-gray-100 bg-white/50 backdrop-blur-sm flex justify-center items-center shadow-sm">
+      <div className="flex-1 flex flex-col justify-center items-center gap-1.5 px-2 text-center">
+        <div className="text-text-muted text-[11px] font-medium flex items-center gap-1">
+          {leftIcon} {leftTitle}
         </div>
-      )}
-      {!icon && (
-        <p className="text-[10px] text-text-muted font-medium mb-0.5">{title}</p>
-      )}
-      <p className={`text-sm font-bold ${styles.text}`}>
-        {prefix} Rp {typeof amount === 'number' ? formatCurrency(amount) : amount}
-      </p>
+        <div className={`text-sm font-bold ${leftColorClass}`}>
+          {leftPrefix} Rp {typeof leftAmount === 'number' ? formatCurrency(leftAmount) : leftAmount}
+        </div>
+      </div>
+      
+      <div className="w-px h-8 bg-gray-100 shrink-0" />
+      
+      <div className="flex-1 flex flex-col justify-center items-center gap-1.5 px-2 text-center">
+        <div className="text-text-muted text-[11px] font-medium flex items-center gap-1">
+          {rightIcon} {rightTitle}
+        </div>
+        <div className={`text-sm font-bold ${rightColorClass}`}>
+          {rightPrefix} Rp {typeof rightAmount === 'number' ? formatCurrency(rightAmount) : rightAmount}
+        </div>
+      </div>
     </div>
   )
 }

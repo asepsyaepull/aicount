@@ -1,27 +1,47 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
-import { HomePage } from './pages/Home'
-import { TransactionsPage } from './pages/Transactions'
-import { BudgetPage } from './pages/Budget'
-import { StatisticsPage } from './pages/Statistics'
-import { ProfilePage } from './pages/Profile'
-import { LoginPage } from './pages/Login'
-import { RegisterPage } from './pages/Register'
-import { useAppStore } from './stores/appStore'
 import { supabase } from './lib/supabase'
+import { BudgetPage } from './pages/Budget'
+import { HomePage } from './pages/Home'
+import { LoginPage } from './pages/Login'
+import { OnboardingPage } from './pages/OnboardingPage'
+import { ProfilePage } from './pages/Profile'
+import { RegisterPage } from './pages/Register'
+import { StatisticsPage } from './pages/Statistics'
+import { TransactionsPage } from './pages/Transactions'
+import { useAppStore } from './stores/appStore'
 import type { Session } from './types/supabase'
 
 function App() {
   const [isReady, setIsReady] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
   const setCurrentUser = useAppStore((s) => s.setCurrentUser)
 
   useEffect(() => {
     async function fetchUserProfile(userId: string) {
-      const { data } = await supabase.from('users').select('family_id').eq('id', userId).single()
+      const { data } = await supabase.from('users').select('family_id, created_at').eq('id', userId).single()
       if (data) {
         setCurrentUser(userId, data.family_id)
+
+        // Check if user has completed onboarding
+        const onboardedFlag = localStorage.getItem(`aicount_onboarded_${userId}`)
+        if (onboardedFlag) {
+          setNeedsOnboarding(false)
+        } else {
+          // If no flag in localStorage, check if they are a NEW user (created < 5 minutes ago)
+          const isNewUser = data.created_at && (Date.now() - new Date(data.created_at).getTime() < 5 * 60 * 1000)
+
+          if (isNewUser) {
+            // New user must go through onboarding
+            setNeedsOnboarding(true)
+          } else {
+            // Old user who registered before onboarding feature → auto-mark as onboarded
+            localStorage.setItem(`aicount_onboarded_${userId}`, 'true')
+            setNeedsOnboarding(false)
+          }
+        }
       }
       setIsReady(true)
     }
@@ -55,10 +75,8 @@ function App() {
     return (
       <div className="flex items-center justify-center h-dvh bg-bg">
         <div className="flex flex-col items-center gap-3 animate-pulse">
-          <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg">
-            <span className="text-white font-extrabold text-2xl">A</span>
-          </div>
-          <p className="text-sm font-semibold text-primary">Aicount</p>
+          <img src="/icons/icon-192x192.png" alt="Logo" className="w-16 h-16" />
+          <p className="text-sm font-semibold text-primary">Aicount App</p>
         </div>
       </div>
     )
@@ -67,10 +85,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
-        <Route path="/register" element={session ? <Navigate to="/" /> : <RegisterPage />} />
-        
-        <Route element={session ? <AppShell /> : <Navigate to="/login" />}>
+        <Route path="/login" element={session ? <Navigate to={needsOnboarding ? '/onboarding' : '/'} /> : <LoginPage />} />
+        <Route path="/register" element={session ? <Navigate to={needsOnboarding ? '/onboarding' : '/'} /> : <RegisterPage />} />
+        <Route path="/onboarding" element={session ? <OnboardingPage /> : <Navigate to="/login" />} />
+
+        <Route element={session ? (needsOnboarding ? <Navigate to="/onboarding" /> : <AppShell />) : <Navigate to="/login" />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/budget" element={<BudgetPage />} />

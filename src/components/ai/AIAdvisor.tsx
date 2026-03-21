@@ -1,10 +1,10 @@
+import { Loader2, Sparkles, X } from 'lucide-react'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Sparkles, X, Loader2 } from 'lucide-react'
-import { getFinancialAdvice } from '../../lib/gemini'
+import { useCategories } from '../../hooks/useCategories'
 import { useTransactions } from '../../hooks/useTransactions'
 import { useWallets } from '../../hooks/useWallets'
-import { useCategories } from '../../hooks/useCategories'
+import { getFinancialAdvice } from '../../lib/gemini'
 import { formatCurrency } from '../../utils/currency'
 
 interface AIAdvisorProps {
@@ -15,7 +15,7 @@ interface AIAdvisorProps {
 export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
   const { allTransactions, totalIncome, totalExpense } = useTransactions()
   const { totalBalance } = useWallets()
-  const categories = useCategories()
+  const { categories } = useCategories()
 
   const [advice, setAdvice] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -55,10 +55,10 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
-        <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5 min-h-[50vh] max-h-[85vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
+      <div className="fixed inset-0 z-50 overlay" onClick={onClose} />
+      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+        <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
+          <div className="flex items-center justify-between p-4 pb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center">
                 <Sparkles size={16} className="text-white" />
@@ -73,22 +73,22 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="px-4 pb-6 space-y-4">
             {!hasFetched && !loading && (
-              <div className="text-center py-10">
+              <div className="flex flex-col items-center text-center py-10">
                 <p className="text-4xl mb-3">🤖</p>
                 <h4 className="text-base font-bold text-text mb-1">Butuh Saran Keuangan?</h4>
                 <p className="text-sm text-text-muted mb-6">
                   Agent AI akan menganalisis tren pengeluaran dan pemasukan Anda bulan ini untuk memberikan insight personal.
                 </p>
-                <button
-                  onClick={fetchAdvice}
-                  className="w-full py-3.5 rounded-xl gradient-primary text-white font-semibold text-sm shadow-lg shadow-primary/25"
-                >
-                  Analisis Keuangan Saya
-                </button>
               </div>
             )}
+            <button
+              onClick={fetchAdvice}
+              className="w-full py-3.5 rounded-xl gradient-primary text-white font-semibold text-sm shadow-lg shadow-primary/25"
+            >
+              Analisis Keuangan Saya
+            </button>
 
             {loading && (
               <div className="flex flex-col items-center justify-center py-16">

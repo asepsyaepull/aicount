@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAppStore } from '../stores/appStore'
 import type { WalletRow } from '../types/supabase'
@@ -29,28 +29,43 @@ export function useWallets() {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const [wallets, setWallets] = useState<Wallet[]>([])
 
-  useEffect(() => {
+  const fetchWallets = useCallback(async () => {
     if (!familyId) return
+    const { data } = await supabase.from('wallets').select('*').eq('family_id', familyId)
+    if (data) {
+      setWallets((data as WalletRow[]).map(mapRow))
+    }
+  }, [familyId])
 
-    const fetchWallets = async () => {
-      const { data } = await supabase.from('wallets').select('*').eq('family_id', familyId)
-      if (data) {
-        setWallets((data as WalletRow[]).map(mapRow))
-      }
+  useEffect(() => {
+    let ignore = false
+
+    const initialize = async () => {
+      if (!familyId) return
+      await fetchWallets()
     }
 
-    fetchWallets()
+    initialize()
 
     const channel = supabase.channel('wallets_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wallets', filter: `family_id=eq.${familyId}` }, fetchWallets)
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'wallets', filter: `family_id=eq.${familyId}` }, 
+        () => {
+          if (!ignore) fetchWallets()
+        }
+      )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [familyId])
+    return () => {
+      ignore = true
+      supabase.removeChannel(channel)
+    }
+  }, [familyId, fetchWallets])
 
   const totalBalance = wallets.reduce((sum, w) => sum + w.balance, 0)
 
-  return { wallets, totalBalance }
+  return { wallets, totalBalance, refresh: fetchWallets }
 }
 
 export async function addWallet(wallet: Omit<Wallet, 'id' | 'createdAt'>) {

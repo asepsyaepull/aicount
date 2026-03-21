@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAppStore } from '../stores/appStore'
 import type { TransactionRow } from '../types/supabase'
@@ -36,47 +36,69 @@ export function useTransactions(limit?: number) {
   const selectedMonth = useAppStore((s) => s.selectedMonth)
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
-  useEffect(() => {
+  const fetchTransactions = useCallback(async () => {
     if (!familyId) return
 
     const [month, year] = selectedMonth.split('-').map(Number)
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0]
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-    const fetchTransactions = async () => {
-      let query = supabase
-        .from('transactions')
-        .select('*')
-        .eq('family_id', familyId)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: false })
-        .order('created_at', { ascending: false })
+    let query = supabase
+      .from('transactions')
+      .select('*')
+      .eq('family_id', familyId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: false })
+      .order('created_at', { ascending: false })
 
-      if (limit) {
-        query = query.limit(limit)
-      }
-
-      const { data } = await query
-      
-      if (data) {
-        setTransactions((data as TransactionRow[]).map(mapRow))
-      }
+    if (limit) {
+      query = query.limit(limit)
     }
 
-    fetchTransactions()
+    const { data } = await query
+    
+    if (data) {
+      setTransactions((data as TransactionRow[]).map(mapRow))
+    }
+  }, [familyId, selectedMonth, limit])
+
+  useEffect(() => {
+    let ignore = false
+
+    const initialize = async () => {
+      if (!familyId) return
+      await fetchTransactions()
+    }
+
+    initialize()
 
     const channel = supabase.channel('transactions_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, fetchTransactions)
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, 
+        () => {
+          if (!ignore) fetchTransactions()
+        }
+      )
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [familyId, selectedMonth, limit])
+    return () => {
+      ignore = true;
+      supabase.removeChannel(channel)
+    }
+  }, [familyId, fetchTransactions])
 
   const totalIncome = transactions.filter((t) => t.type === 'income').reduce((sum, t) => sum + t.amount, 0)
   const totalExpense = transactions.filter((t) => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0)
 
-  return { transactions, totalIncome, totalExpense, allTransactions: transactions }
+  return {
+    transactions,
+    allTransactions: transactions,
+    totalIncome,
+    totalExpense,
+    refresh: fetchTransactions
+  }
 }
 
 export function useTransactionsByCategory(categoryId: string) {
@@ -85,6 +107,8 @@ export function useTransactionsByCategory(categoryId: string) {
   const [spent, setSpent] = useState(0)
 
   useEffect(() => {
+    let ignore = false
+
     if (!familyId) return
 
     const [month, year] = selectedMonth.split('-').map(Number)
@@ -101,7 +125,7 @@ export function useTransactionsByCategory(categoryId: string) {
         .gte('date', startDate)
         .lte('date', endDate)
 
-      if (data) {
+      if (!ignore && data) {
         setSpent(data.reduce((sum: number, t: { amount: number }) => sum + Number(t.amount), 0))
       }
     }
@@ -109,10 +133,15 @@ export function useTransactionsByCategory(categoryId: string) {
     fetchSpent()
 
     const channel = supabase.channel(`tx_cat_${categoryId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, fetchSpent)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, () => {
+        if (!ignore) fetchSpent()
+      })
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      ignore = true
+      supabase.removeChannel(channel)
+    }
   }, [familyId, categoryId, selectedMonth])
 
   return spent
@@ -138,4 +167,24 @@ export async function addTransaction(transaction: Omit<Transaction, 'id' | 'crea
 export async function deleteTransaction(id: string) {
   // Trigger also handles reversal on DELETE
   await supabase.from('transactions').delete().eq('id', id)
+}
+
+export async function updateTransaction(id: string, updates: Partial<Omit<Transaction, 'id' | 'createdAt' | 'familyId' | 'createdBy'>>) {
+  const payload: Partial<{
+    wallet_id: string
+    category_id: string
+    type: 'income' | 'expense' | 'transfer'
+    amount: number
+    date: string
+    note: string
+  }> = {}
+  if (updates.walletId) payload.wallet_id = updates.walletId
+  if (updates.categoryId) payload.category_id = updates.categoryId
+  if (updates.type) payload.type = updates.type
+  if (updates.amount !== undefined) payload.amount = updates.amount
+  if (updates.date) payload.date = updates.date.toISOString().split('T')[0]
+  if (updates.note !== undefined) payload.note = updates.note
+
+  const { error } = await supabase.from('transactions').update(payload).eq('id', id)
+  if (error) throw error
 }

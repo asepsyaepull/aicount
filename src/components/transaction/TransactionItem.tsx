@@ -8,6 +8,7 @@ export interface TransactionItemProps {
   categoryName: string
   walletName?: string
   showDate?: boolean // Used to show date in compact list
+  onClick?: (tx: Transaction) => void
 }
 
 export function TransactionItem({ 
@@ -15,7 +16,8 @@ export function TransactionItem({
   categoryIcon, 
   categoryName, 
   walletName,
-  showDate 
+  showDate,
+  onClick
 }: TransactionItemProps) {
   
   const renderTypeIcon = (type: string) => {
@@ -25,7 +27,10 @@ export function TransactionItem({
   }
 
   return (
-    <div className="flex items-center gap-3 bg-white rounded-xl p-3.5 shadow-sm border border-gray-50">
+    <div 
+      onClick={() => onClick?.(tx)}
+      className={`flex items-center gap-3 bg-white rounded-xl p-3.5 shadow-sm border border-gray-50 ${onClick ? 'cursor-pointer hover:bg-gray-50/50 active:scale-[0.98] transition-all' : ''}`}
+    >
       <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-lg">
         {categoryIcon}
       </div>

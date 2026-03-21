@@ -7,6 +7,7 @@ import { addCategory } from '../../hooks/useCategories'
 interface AddCategoryModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void | Promise<void>
   defaultType?: 'income' | 'expense'
 }
 
@@ -15,7 +16,7 @@ const COMMON_EMOJIS = [
   '💰', '🏦', '📈', '💼', '🍔', '☕', '🎫', '🔧', '📱', '💡'
 ]
 
-export function AddCategoryModal({ isOpen, onClose, defaultType = 'expense' }: AddCategoryModalProps) {
+export function AddCategoryModal({ isOpen, onClose, onSuccess, defaultType = 'expense' }: AddCategoryModalProps) {
   const currentFamilyId = useAppStore((s) => s.currentFamilyId)
 
   const [type, setType] = useState<'income' | 'expense'>(defaultType)
@@ -35,6 +36,7 @@ export function AddCategoryModal({ isOpen, onClose, defaultType = 'expense' }: A
         type,
         icon,
       })
+      onSuccess?.()
       onClose()
       setName('')
       setIcon('📦')

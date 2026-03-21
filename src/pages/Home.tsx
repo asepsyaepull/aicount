@@ -3,8 +3,9 @@ import { useState } from 'react'
 import { useCurrentUser } from '../hooks/useUser'
 import { useCategories } from '../hooks/useCategories'
 
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions, type Transaction } from '../hooks/useTransactions'
 import { useBudgets, useTotalBudget } from '../hooks/useBudgets'
+import { useWallets } from '../hooks/useWallets'
 
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { SummaryStatCard } from '../components/ui/SummaryStatCard'
@@ -14,15 +15,20 @@ import { formatCurrency } from '../utils/currency'
 import { calcPercentage } from '../utils/budget'
 import { AIAdvisor } from '../components/ai/AIAdvisor'
 import { MonthPicker } from '../components/ui/MonthPicker'
+import { TransactionDetailsModal } from '../components/transaction/TransactionDetailsModal'
+import { EditTransactionSheet } from '../components/transaction/EditTransactionSheet'
 
 export function HomePage() {
-  const currentUser = useCurrentUser()
-  const { transactions: recentTransactions } = useTransactions(5)
+  const { user: currentUser } = useCurrentUser()
+  const { transactions: recentTransactions, refresh: refreshTransactions } = useTransactions(5)
   const { totalLimit, totalSpent } = useTotalBudget()
-  const budgets = useBudgets()
-  const categories = useCategories()
+  const { budgets, refresh: refreshBudgets } = useBudgets()
+  const { categories } = useCategories()
+  const { wallets } = useWallets()
 
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false)
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const remaining = totalLimit - totalSpent
   const budgetPercentage = totalLimit > 0 ? calcPercentage(totalSpent, totalLimit) : 0
@@ -44,7 +50,7 @@ export function HomePage() {
               {currentUser?.avatarInitials || 'U'}
             </div>
             <div>
-              <p className="text-xs text-text-secondary">{greeting},</p>
+              <p className="text-xs text-text">{greeting},</p>
               <p className="text-base font-bold text-text">{currentUser?.name || 'User'} 👋</p>
             </div>
           </div>
@@ -60,7 +66,10 @@ export function HomePage() {
         <div className="bg-white rounded-2xl p-5 shadow-lg shadow-black/5">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-medium text-text-secondary">Remaining Budget</p>
-            <MonthPicker colorVariant="primary" />
+            <MonthPicker
+              colorVariant="primary"
+              className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors"
+              />
           </div>
           <p className="text-3xl font-extrabold text-text mb-3">
             Rp {formatCurrency(remaining > 0 ? remaining : 0)}
@@ -71,17 +80,15 @@ export function HomePage() {
             <span className="text-xs font-medium text-text-muted">{budgetPercentage}% Used</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-4">
-            <SummaryStatCard 
-              title="Monthly Limit" 
-              amount={totalLimit} 
-              colorVariant="primary" 
-            />
-            <SummaryStatCard 
-              title="Your Spending" 
-              amount={totalSpent} 
-              prefix="-" 
-              colorVariant="red" 
+          <div className="mt-4">
+            <SummaryStatCard
+              leftTitle="Monthly Limit"
+              leftAmount={totalLimit}
+              leftColorClass="text-text"
+              rightTitle="Your Spending"
+              rightAmount={totalSpent}
+              rightPrefix="-"
+              rightColorClass="text-red-500"
             />
           </div>
         </div>
@@ -109,7 +116,7 @@ export function HomePage() {
 
       {/* Spending Insight */}
       <div className="px-5 mt-5">
-        <div 
+        <div
           onClick={() => setIsAdvisorOpen(true)}
           className="gradient-insight rounded-2xl p-4 flex items-center justify-between text-white shadow-lg shadow-primary/20 cursor-pointer hover:opacity-90 transition-opacity active:scale-[0.98]"
         >
@@ -141,6 +148,7 @@ export function HomePage() {
               categoryIcon={getCategoryIcon(tx.categoryId)}
               categoryName={getCategoryName(tx.categoryId)}
               showDate={true}
+              onClick={(t) => setSelectedTx(t)}
             />
           ))}
 
@@ -155,6 +163,29 @@ export function HomePage() {
       </div>
 
       <AIAdvisor isOpen={isAdvisorOpen} onClose={() => setIsAdvisorOpen(false)} />
+
+      <TransactionDetailsModal
+        isOpen={!!selectedTx && !isEditOpen}
+        transaction={selectedTx}
+        categoryName={selectedTx ? getCategoryName(selectedTx.categoryId) : ''}
+        categoryIcon={selectedTx ? getCategoryIcon(selectedTx.categoryId) : ''}
+        walletName={selectedTx ? wallets.find(w => w.id === selectedTx.walletId)?.name || '' : ''}
+        onClose={() => setSelectedTx(null)}
+        onEdit={() => setIsEditOpen(true)}
+      />
+
+      <EditTransactionSheet
+        transaction={selectedTx}
+        isOpen={isEditOpen}
+        onSuccess={() => {
+          refreshTransactions()
+          refreshBudgets()
+        }}
+        onClose={() => {
+          setIsEditOpen(false)
+          setSelectedTx(null)
+        }}
+      />
     </div>
   )
 }

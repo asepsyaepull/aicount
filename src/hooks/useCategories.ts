@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAppStore } from '../stores/appStore'
 import type { CategoryRow } from '../types/supabase'
@@ -45,25 +45,40 @@ export function useCategories() {
   const familyId = useAppStore((s) => s.currentFamilyId)
   const [categories, setCategories] = useState<Category[]>([])
 
-  useEffect(() => {
+  const fetchCats = useCallback(async () => {
     if (!familyId) return
-
-    const fetchCats = async () => {
-      const { data } = await supabase.from('categories').select('*').eq('family_id', familyId)
-      if (data) {
-        setCategories((data as CategoryRow[]).map(mapRow))
-      }
+    const { data } = await supabase.from('categories').select('*').eq('family_id', familyId)
+    if (data) {
+      setCategories((data as CategoryRow[]).map(mapRow))
     }
-
-    fetchCats()
-
-    const channel = supabase.channel('categories_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categories', filter: `family_id=eq.${familyId}` }, fetchCats)
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
   }, [familyId])
 
-  return categories
+  useEffect(() => {
+    let ignore = false
+
+    const initialize = async () => {
+      if (!familyId) return
+      await fetchCats()
+    }
+
+    initialize()
+
+    const channel = supabase.channel('categories_changes')
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'categories', filter: `family_id=eq.${familyId}` }, 
+        () => {
+          if (!ignore) fetchCats()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      ignore = true
+      supabase.removeChannel(channel)
+    }
+  }, [familyId, fetchCats])
+
+  return { categories, refresh: fetchCats }
 }
 

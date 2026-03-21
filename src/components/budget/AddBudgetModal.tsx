@@ -11,13 +11,14 @@ import { Plus } from 'lucide-react'
 interface AddBudgetModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
+export function AddBudgetModal({ isOpen, onClose, onSuccess }: AddBudgetModalProps) {
   const selectedMonth = useAppStore((s) => s.selectedMonth)
   const currentFamilyId = useAppStore((s) => s.currentFamilyId)
-  const budgets = useBudgets()
-  const categories = useCategories()
+  const { budgets } = useBudgets()
+  const { categories } = useCategories()
 
   const [newCategoryId, setNewCategoryId] = useState('')
   const [newAmount, setNewAmount] = useState('')
@@ -40,6 +41,7 @@ export function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
         amountLimit: parseCurrency(newAmount),
         monthYear: selectedMonth,
       })
+      onSuccess?.()
       onClose()
       setNewCategoryId('')
       setNewAmount('')

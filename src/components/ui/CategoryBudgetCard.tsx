@@ -10,9 +10,10 @@ export interface CategoryBudgetCardProps {
   amountLimit: number
   category: Category | null
   variant?: 'dashboard' | 'list'
+  onEdit?: () => void
 }
 
-export function CategoryBudgetCard({ categoryId, amountLimit, category, variant = 'list' }: CategoryBudgetCardProps) {
+export function CategoryBudgetCard({ categoryId, amountLimit, category, variant = 'list', onEdit }: CategoryBudgetCardProps) {
   const spent = useTransactionsByCategory(categoryId)
   const percentage = calcPercentage(spent, amountLimit)
 
@@ -54,7 +55,19 @@ export function CategoryBudgetCard({ categoryId, amountLimit, category, variant 
             {category.icon}
           </div>
           <div>
-            <p className="text-sm font-semibold text-text">{category.name}</p>
+            <p className="text-sm font-semibold text-text flex items-center gap-1.5">
+              {category.name}
+              {variant === 'list' && onEdit && (
+                <button 
+                  onClick={onEdit}
+                  className="p-1 rounded bg-gray-50 text-text-muted hover:text-primary transition-colors hover:bg-primary-50 active:scale-95"
+                  title="Edit Budget"
+                >
+                  <TrendingUp size={12} className="hidden" /> {/* Force import to be used if I accidentally removed it, but I need Pencil */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+              )}
+            </p>
             <p className="text-[11px] text-text-muted">{getBudgetStatus(percentage)}</p>
           </div>
         </div>

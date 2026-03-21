@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAppStore } from '../stores/appStore'
 import type { BudgetRow } from '../types/supabase'
@@ -28,31 +28,46 @@ export function useBudgets() {
   const selectedMonth = useAppStore((s) => s.selectedMonth)
   const [budgets, setBudgets] = useState<Budget[]>([])
 
-  useEffect(() => {
+  const fetchBudgets = useCallback(async () => {
     if (!familyId) return
+    const { data } = await supabase
+      .from('budgets')
+      .select('*')
+      .eq('family_id', familyId)
+      .eq('month_year', selectedMonth)
 
-    const fetchBudgets = async () => {
-      const { data } = await supabase
-        .from('budgets')
-        .select('*')
-        .eq('family_id', familyId)
-        .eq('month_year', selectedMonth)
-
-      if (data) {
-        setBudgets((data as BudgetRow[]).map(mapRow))
-      }
+    if (data) {
+      setBudgets((data as BudgetRow[]).map(mapRow))
     }
-
-    fetchBudgets()
-
-    const channel = supabase.channel('budgets_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'budgets', filter: `family_id=eq.${familyId}` }, fetchBudgets)
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
   }, [familyId, selectedMonth])
 
-  return budgets
+  useEffect(() => {
+    let ignore = false
+
+    const initialize = async () => {
+      if (!familyId) return
+      await fetchBudgets()
+    }
+
+    initialize()
+
+    const channel = supabase.channel('budgets_changes')
+      .on(
+        'postgres_changes', 
+        { event: '*', schema: 'public', table: 'budgets', filter: `family_id=eq.${familyId}` }, 
+        () => {
+          if (!ignore) fetchBudgets()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      ignore = true
+      supabase.removeChannel(channel)
+    }
+  }, [familyId, fetchBudgets])
+
+  return { budgets, refresh: fetchBudgets }
 }
 
 export function useTotalBudget() {
@@ -61,6 +76,7 @@ export function useTotalBudget() {
   const [data, setData] = useState({ totalLimit: 0, totalSpent: 0 })
 
   useEffect(() => {
+    let ignore = false
     if (!familyId) return
 
     const [month, year] = selectedMonth.split('-').map(Number)
@@ -86,20 +102,27 @@ export function useTotalBudget() {
 
       const totalSpent = expenses?.reduce((sum: number, t: { amount: number }) => sum + Number(t.amount), 0) || 0
 
-      setData({ totalLimit, totalSpent })
+      if (!ignore) {
+        setData({ totalLimit, totalSpent })
+      }
     }
 
     fetchData()
 
     const limitsChannel = supabase.channel('ttl_b_ch')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'budgets', filter: `family_id=eq.${familyId}` }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'budgets', filter: `family_id=eq.${familyId}` }, () => {
+        if (!ignore) fetchData()
+      })
       .subscribe()
       
     const spentChannel = supabase.channel('ttl_t_ch')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `family_id=eq.${familyId}` }, () => {
+        if (!ignore) fetchData()
+      })
       .subscribe()
 
     return () => {
+      ignore = true
       supabase.removeChannel(limitsChannel)
       supabase.removeChannel(spentChannel)
     }

@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2A9D8F;
-  --color-primary-light: #48BFA0;
-  --color-primary-dark: #1E7A6E;
-  --color-primary-50: #F0FDFB;
-  --color-primary-100: #CCFBF1;
-  --color-primary-200: #99F6E4;
+  --color-primary: #2a8e9e;
+  --color-primary-light: #55a5b1;
+  --color-primary-dark: #174e57;
+  --color-primary-50: #eaf4f5;
+  --color-primary-100: #bddce1;
+  --color-primary-200: #9dcbd2;
   --color-secondary: #264653;
   --color-accent: #E9C46A;
   --color-danger: #E76F51;
@@ -20,6 +20,7 @@
   --color-text: #1A1A2E;
   --color-text-secondary: #6B7280;
   --color-text-muted: #9CA3AF;
+  --color-text-light: #F7FAFA;
   --color-border: #E5E7EB;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -69,15 +70,15 @@ body {
 
 /* Gradient backgrounds */
 .gradient-header {
-  background: linear-gradient(135deg, #E0F7F3 0%, #B2EBE0 30%, #A8E6CF 60%, #D4F1E9 100%);
+  background: linear-gradient(135deg, #9dcbd2 0%, #2a8e9e 100%);
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #2A9D8F 0%, #48BFA0 100%);
+  background: linear-gradient(135deg, #2a8e9e 0%, #55a5b1 100%);
 }
 
 .gradient-insight {
-  background: linear-gradient(135deg, #2A9D8F 0%, #3DB8A4 50%, #48BFA0 100%);
+  background: linear-gradient(135deg, #2a8e9e 0%, #268190 50%, #1e6570 100%);
 }
 
 /* Animations */

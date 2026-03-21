@@ -69,11 +69,11 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
       {/* Modal Slide Up */}
       {isOpen && createPortal(
         <>
-          <div className="fixed inset-0 z-60 overlay" onClick={() => setIsOpen(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
-            <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5 pb-8">
+          <div className="fixed inset-0 z-50 overlay" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+            <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-4 pb-2">
                 <h3 className="text-lg font-bold text-text">Select Month</h3>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -83,9 +83,10 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
                 </button>
               </div>
 
-              {/* Year Selector */}
-              <div className="flex items-center justify-between px-2 mb-6">
-                <button 
+              <div className="px-4 pb-6">
+                {/* Year Selector */}
+                <div className="flex items-center justify-between px-2 mb-6">
+                  <button 
                   onClick={() => setViewYear(y => y - 1)}
                   className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-text-secondary transition-colors"
                 >
@@ -132,9 +133,10 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
               </div>
             </div>
           </div>
-        </>,
-        document.body
-      )}
-    </>
-  )
+        </div>
+      </>,
+      document.body
+    )}
+  </>
+)
 }
