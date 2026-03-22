@@ -47,6 +47,7 @@ CREATE TABLE public.transactions (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   family_id UUID REFERENCES public.families(id) ON DELETE CASCADE NOT NULL,
   wallet_id UUID REFERENCES public.wallets(id) ON DELETE CASCADE NOT NULL,
+  destination_wallet_id UUID REFERENCES public.wallets(id) ON DELETE CASCADE,
   category_id UUID REFERENCES public.categories(id) ON DELETE RESTRICT NOT NULL,
   type VARCHAR(50) CHECK (type IN ('income', 'expense', 'transfer')),
   amount DECIMAL(15, 2) NOT NULL,
@@ -73,27 +74,41 @@ CREATE TABLE public.budgets (
 CREATE OR REPLACE FUNCTION update_wallet_balance()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- If new transaction
-  IF (TG_OP = 'INSERT') THEN
-    IF (NEW.type = 'income') THEN
-      UPDATE public.wallets SET balance = balance + NEW.amount WHERE id = NEW.wallet_id;
-    ELSIF (NEW.type = 'expense') THEN
-      UPDATE public.wallets SET balance = balance - NEW.amount WHERE id = NEW.wallet_id;
-    END IF;
-  -- If deleted transaction
-  ELSIF (TG_OP = 'DELETE') THEN
+  -- 1. Jika menghapus atau mengedit transaksi lama (Kembalikan saldo seperti semula)
+  IF (TG_OP = 'DELETE' OR TG_OP = 'UPDATE') THEN
     IF (OLD.type = 'income') THEN
       UPDATE public.wallets SET balance = balance - OLD.amount WHERE id = OLD.wallet_id;
     ELSIF (OLD.type = 'expense') THEN
       UPDATE public.wallets SET balance = balance + OLD.amount WHERE id = OLD.wallet_id;
+    ELSIF (OLD.type = 'transfer') THEN
+      UPDATE public.wallets SET balance = balance + OLD.amount WHERE id = OLD.wallet_id;
+      IF (OLD.destination_wallet_id IS NOT NULL) THEN
+        UPDATE public.wallets SET balance = balance - OLD.amount WHERE id = OLD.destination_wallet_id;
+      END IF;
     END IF;
   END IF;
+
+  -- 2. Jika menambah atau menyimpan hasil edit transaksi baru (Terapkan saldo baru)
+  IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+    IF (NEW.type = 'income') THEN
+      UPDATE public.wallets SET balance = balance + NEW.amount WHERE id = NEW.wallet_id;
+    ELSIF (NEW.type = 'expense') THEN
+      UPDATE public.wallets SET balance = balance - NEW.amount WHERE id = NEW.wallet_id;
+    ELSIF (NEW.type = 'transfer') THEN
+      UPDATE public.wallets SET balance = balance - NEW.amount WHERE id = NEW.wallet_id;
+      IF (NEW.destination_wallet_id IS NOT NULL) THEN
+        UPDATE public.wallets SET balance = balance + NEW.amount WHERE id = NEW.destination_wallet_id;
+      END IF;
+    END IF;
+  END IF;
+
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS transaction_wallet_update ON public.transactions;
 CREATE TRIGGER transaction_wallet_update
-AFTER INSERT OR DELETE ON public.transactions
+AFTER INSERT OR UPDATE OR DELETE ON public.transactions
 FOR EACH ROW EXECUTE FUNCTION update_wallet_balance();
 
 -- ==========================================

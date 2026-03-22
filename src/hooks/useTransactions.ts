@@ -7,6 +7,7 @@ export interface Transaction {
   id: string
   familyId: string
   walletId: string
+  destinationWalletId?: string | null
   categoryId: string
   type: 'income' | 'expense' | 'transfer'
   amount: number
@@ -21,6 +22,7 @@ function mapRow(t: TransactionRow): Transaction {
     id: t.id,
     familyId: t.family_id,
     walletId: t.wallet_id,
+    destinationWalletId: t.destination_wallet_id ?? null,
     categoryId: t.category_id,
     type: t.type,
     amount: Number(t.amount),
@@ -154,6 +156,7 @@ export async function addTransaction(transaction: Omit<Transaction, 'id' | 'crea
   const { data, error } = await supabase.from('transactions').insert([{
     family_id: transaction.familyId,
     wallet_id: transaction.walletId,
+    destination_wallet_id: transaction.destinationWalletId || null,
     category_id: transaction.categoryId,
     type: transaction.type,
     amount: transaction.amount,
@@ -174,6 +177,7 @@ export async function deleteTransaction(id: string) {
 export async function updateTransaction(id: string, updates: Partial<Omit<Transaction, 'id' | 'createdAt' | 'familyId' | 'createdBy'>>) {
   const payload: Partial<{
     wallet_id: string
+    destination_wallet_id: string | null
     category_id: string
     type: 'income' | 'expense' | 'transfer'
     amount: number
@@ -181,6 +185,7 @@ export async function updateTransaction(id: string, updates: Partial<Omit<Transa
     note: string
   }> = {}
   if (updates.walletId) payload.wallet_id = updates.walletId
+  if (updates.destinationWalletId !== undefined) payload.destination_wallet_id = updates.destinationWalletId
   if (updates.categoryId) payload.category_id = updates.categoryId
   if (updates.type) payload.type = updates.type
   if (updates.amount !== undefined) payload.amount = updates.amount

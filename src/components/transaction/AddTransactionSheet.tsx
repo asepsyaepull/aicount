@@ -28,6 +28,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
   const [amount, setAmount] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [walletId, setWalletId] = useState('')
+  const [destinationWalletId, setDestinationWalletId] = useState('')
   const [note, setNote] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [smartInput, setSmartInput] = useState('')
@@ -42,10 +43,11 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
 
   // Set defaults
   useEffect(() => {
-    if (wallets.length > 0 && !walletId) {
-      setWalletId(wallets[0].id)
+    if (wallets.length > 0) {
+      if (!walletId) setWalletId(wallets[0].id)
+      if (!destinationWalletId) setDestinationWalletId(wallets.length > 1 ? wallets[1].id : wallets[0].id)
     }
-  }, [wallets, walletId])
+  }, [wallets, walletId, destinationWalletId])
 
   useEffect(() => {
     if (categories.length > 0 && !categoryId) {
@@ -157,6 +159,7 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
         familyId: currentFamilyId,
         createdBy: currentUserId,
         walletId,
+        destinationWalletId: type === 'transfer' ? destinationWalletId : null,
         categoryId: categoryId || 'cat-other-expense',
         amount: parseCurrency(amount),
         type,
@@ -303,9 +306,11 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
               </div>
             </div>
 
-            {/* Wallet */}
+            {/* Wallet (Source) */}
             <div>
-              <label className="text-xs font-medium text-text-secondary mb-1.5 block">Wallet</label>
+              <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+                {type === 'transfer' ? 'From Wallet' : 'Wallet'}
+              </label>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {wallets.map((w) => (
                   <button
@@ -321,6 +326,27 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
                 ))}
               </div>
             </div>
+
+            {/* Destination Wallet */}
+            {type === 'transfer' && (
+              <div>
+                <label className="text-xs font-medium text-text-secondary mb-1.5 block">To Wallet</label>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {wallets.map((w) => (
+                    <button
+                      key={w.id}
+                      onClick={() => setDestinationWalletId(w.id)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 whitespace-nowrap transition-all ${destinationWalletId === w.id
+                          ? 'border-primary bg-primary-50'
+                          : 'border-transparent bg-gray-50'
+                        }`}
+                    >
+                      <span className="text-sm font-medium">{w.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Date & Note */}
             <div className="grid grid-cols-1 gap-3">

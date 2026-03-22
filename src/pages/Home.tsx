@@ -147,6 +147,7 @@ export function HomePage() {
               transaction={tx}
               categoryIcon={getCategoryIcon(tx.categoryId)}
               categoryName={getCategoryName(tx.categoryId)}
+              destinationWalletName={tx.destinationWalletId ? wallets.find(w => w.id === tx.destinationWalletId)?.name : undefined}
               showDate={true}
               onClick={(t) => setSelectedTx(t)}
             />
@@ -170,6 +171,7 @@ export function HomePage() {
         categoryName={selectedTx ? getCategoryName(selectedTx.categoryId) : ''}
         categoryIcon={selectedTx ? getCategoryIcon(selectedTx.categoryId) : ''}
         walletName={selectedTx ? wallets.find(w => w.id === selectedTx.walletId)?.name || '' : ''}
+        destinationWalletName={selectedTx?.destinationWalletId ? wallets.find(w => w.id === selectedTx.destinationWalletId)?.name || '' : undefined}
         onClose={() => setSelectedTx(null)}
         onEdit={() => setIsEditOpen(true)}
         onDelete={() => {

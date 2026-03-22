@@ -98,6 +98,7 @@ export function TransactionsPage() {
                   categoryIcon={getCategoryIcon(tx.categoryId)}
                   categoryName={getCategoryName(tx.categoryId)}
                   walletName={getWalletName(tx.walletId)}
+                  destinationWalletName={tx.destinationWalletId ? getWalletName(tx.destinationWalletId) : undefined}
                   onClick={(t) => setSelectedTx(t)}
                 />
               ))}
@@ -119,6 +120,7 @@ export function TransactionsPage() {
         categoryName={selectedTx ? getCategoryName(selectedTx.categoryId) : ''}
         categoryIcon={selectedTx ? getCategoryIcon(selectedTx.categoryId) : ''}
         walletName={selectedTx ? getWalletName(selectedTx.walletId) : ''}
+        destinationWalletName={selectedTx?.destinationWalletId ? getWalletName(selectedTx.destinationWalletId) : undefined}
         onClose={() => setSelectedTx(null)}
         onEdit={() => setIsEditOpen(true)}
         onDelete={refreshTransactions}

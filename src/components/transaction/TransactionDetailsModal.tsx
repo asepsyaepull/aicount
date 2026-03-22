@@ -12,6 +12,7 @@ interface TransactionDetailsModalProps {
   categoryName: string
   categoryIcon: string
   walletName: string
+  destinationWalletName?: string
   onClose: () => void
   onEdit: () => void
   onDelete?: () => void
@@ -23,6 +24,7 @@ export function TransactionDetailsModal({
   categoryName,
   categoryIcon,
   walletName,
+  destinationWalletName,
   onClose,
   onEdit,
   onDelete,
@@ -112,14 +114,30 @@ export function TransactionDetailsModal({
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                <Wallet size={14} className="text-text-secondary" />
+            <div className="flex justify-between items-center gap-4">
+              <div className="flex-1 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+                  <Wallet size={14} className="text-text-secondary" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-medium text-text-muted">
+                    {displayTx.type === 'transfer' ? 'From Wallet' : 'Wallet'}
+                  </p>
+                  <p className="text-sm font-semibold text-text">{walletName}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] font-medium text-text-muted">Wallet</p>
-                <p className="text-sm font-semibold text-text">{walletName}</p>
-              </div>
+
+              {displayTx.type === 'transfer' && destinationWalletName && (
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+                    <Wallet size={14} className="text-text-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-text-muted">To Wallet</p>
+                    <p className="text-sm font-semibold text-text">{destinationWalletName}</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-3">

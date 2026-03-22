@@ -23,6 +23,7 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
   const [amount, setAmount] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const [walletId, setWalletId] = useState('')
+  const [destinationWalletId, setDestinationWalletId] = useState('')
   const [note, setNote] = useState('')
   const [date, setDate] = useState('')
   
@@ -40,6 +41,7 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
       setAmount(formatInputCurrency(transaction.amount.toString()))
       setCategoryId(transaction.categoryId)
       setWalletId(transaction.walletId)
+      setDestinationWalletId(transaction.destinationWalletId || '')
       setNote(transaction.note)
       // Transaction date comes in as a Date object including the time.
       // We must get the local YYYY-MM-DD.
@@ -70,6 +72,7 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
     try {
       await updateTransaction(transaction.id, {
         walletId,
+        destinationWalletId: type === 'transfer' ? destinationWalletId : null,
         categoryId: categoryId || 'cat-other-expense',
         amount: parseCurrency(amount),
         type,
@@ -165,9 +168,11 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
               </div>
             </div>
 
-            {/* Wallet */}
+            {/* Wallet (Source) */}
             <div>
-              <label className="text-xs font-medium text-text-secondary mb-1.5 block">Wallet</label>
+              <label className="text-xs font-medium text-text-secondary mb-1.5 block">
+                {type === 'transfer' ? 'From Wallet' : 'Wallet'}
+              </label>
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {wallets.map((w) => (
                   <button
@@ -183,6 +188,27 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
                 ))}
               </div>
             </div>
+
+            {/* Destination Wallet */}
+            {type === 'transfer' && (
+              <div>
+                <label className="text-xs font-medium text-text-secondary mb-1.5 block">To Wallet</label>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {wallets.map((w) => (
+                    <button
+                      key={w.id}
+                      onClick={() => setDestinationWalletId(w.id)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 whitespace-nowrap transition-all ${destinationWalletId === w.id
+                          ? 'border-primary bg-primary-50'
+                          : 'border-transparent bg-gray-50'
+                        }`}
+                    >
+                      <span className="text-sm font-medium">{w.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Date & Note */}
             <div className="grid grid-cols-1 gap-3">

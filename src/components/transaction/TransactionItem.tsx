@@ -7,6 +7,7 @@ export interface TransactionItemProps {
   categoryIcon: string
   categoryName: string
   walletName?: string
+  destinationWalletName?: string
   showDate?: boolean // Used to show date in compact list
   onClick?: (tx: Transaction) => void
 }
@@ -16,6 +17,7 @@ export function TransactionItem({
   categoryIcon, 
   categoryName, 
   walletName,
+  destinationWalletName,
   showDate,
   onClick
 }: TransactionItemProps) {
@@ -42,8 +44,8 @@ export function TransactionItem({
         {walletName ? (
           <div className="flex items-center gap-1.5 mt-0.5">
             {renderTypeIcon(tx.type)}
-            <span className="text-[11px] text-text-muted">
-              {categoryName} · {walletName}
+            <span className="text-[11px] text-text-muted line-clamp-1">
+              {categoryName} · {walletName} {tx.type === 'transfer' && destinationWalletName ? ` ➔ ${destinationWalletName}` : ''}
             </span>
           </div>
         ) : (

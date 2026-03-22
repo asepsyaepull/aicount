@@ -56,6 +56,7 @@ export type Tables = {
     id: string
     family_id: string
     wallet_id: string
+    destination_wallet_id: string | null
     category_id: string
     type: 'income' | 'expense' | 'transfer'
     amount: number
