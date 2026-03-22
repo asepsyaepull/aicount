@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useAppStore } from '../../stores/appStore'
 import { formatMonthYear } from '../../utils/budget'
 import { ChevronDown, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface MonthPickerProps {
   className?: string
@@ -20,6 +21,8 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
 
   const [isOpen, setIsOpen] = useState(false)
   const [viewYear, setViewYear] = useState<number>(new Date().getFullYear())
+
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
 
   const handleOpen = () => {
     // Initialize view year to the currently selected year when opening
@@ -67,10 +70,10 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
       </button>
 
       {/* Modal Slide Up */}
-      {isOpen && createPortal(
+      {shouldRender && createPortal(
         <>
-          <div className="fixed inset-0 z-50 overlay" onClick={() => setIsOpen(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+          <div className={`fixed inset-0 z-50 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={() => setIsOpen(false)} />
+          <div className={`fixed inset-x-0 bottom-0 z-50 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
             <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto pb-16">
               {/* Header */}
               <div className="flex items-center justify-between p-4 pb-2">

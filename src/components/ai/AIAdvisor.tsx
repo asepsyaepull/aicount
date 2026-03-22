@@ -6,6 +6,7 @@ import { useTransactions } from '../../hooks/useTransactions'
 import { useWallets } from '../../hooks/useWallets'
 import { getFinancialAdvice } from '../../lib/gemini'
 import { formatCurrency } from '../../utils/currency'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface AIAdvisorProps {
   isOpen: boolean
@@ -21,7 +22,9 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
   const [loading, setLoading] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
 
-  if (!isOpen) return null
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+
+  if (!shouldRender) return null
 
   const fetchAdvice = async () => {
     setLoading(true)
@@ -55,8 +58,8 @@ export function AIAdvisor({ isOpen, onClose }: AIAdvisorProps) {
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-50 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+      <div className={`fixed inset-0 z-50 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-50 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
           <div className="flex items-center justify-between p-4 pb-2">
             <div className="flex items-center gap-2">

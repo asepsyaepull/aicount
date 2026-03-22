@@ -12,6 +12,7 @@ import { DatePicker } from '../ui/DatePicker'
 import { AddCategoryModal } from '../category/AddCategoryModal'
 import { Plus } from 'lucide-react'
 import { useToastStore } from '../../stores/toastStore'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 export interface AddTransactionSheetProps {
   isOpen: boolean
@@ -179,15 +180,17 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
     }
   }
 
-  if (!isOpen) return null
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+
+  if (!shouldRender) return null
 
   return createPortal(
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
+      <div className={`fixed inset-0 z-60 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
+      <div className={`fixed inset-x-0 bottom-0 z-70 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between p-4 pb-2">

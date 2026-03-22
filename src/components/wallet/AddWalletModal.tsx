@@ -5,6 +5,7 @@ import { walletTypes, walletColors, bankOptions, ewalletOptions } from '../../co
 import { addWallet } from '../../hooks/useWallets'
 import { useAppStore } from '../../stores/appStore'
 import { formatInputCurrency, parseCurrency } from '../../utils/currency'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface AddWalletModalProps {
   isOpen: boolean
@@ -21,7 +22,9 @@ export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalPro
   const [newColor, setNewColor] = useState('#2A9D8F')
   const [saving, setSaving] = useState(false)
 
-  if (!isOpen) return null
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+
+  if (!shouldRender) return null
 
   const handleAddWallet = async () => {
     if (!newName || !currentFamilyId) return
@@ -49,8 +52,8 @@ export function AddWalletModal({ isOpen, onClose, onSuccess }: AddWalletModalPro
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
+      <div className={`fixed inset-0 z-60 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-70 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text">Add Wallet</h3>

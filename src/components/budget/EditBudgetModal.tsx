@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Trash2 } from 'lucide-react'
 import { updateBudget, deleteBudget, type Budget } from '../../hooks/useBudgets'
 import type { Category } from '../../hooks/useCategories'
 import { formatCurrency, formatInputCurrency, parseCurrency } from '../../utils/currency'
 import { DestructiveModal } from '../ui/DestructiveModal'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface EditBudgetModalProps {
   budget: Budget | null
@@ -26,12 +27,26 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
     }
   }, [budget])
 
-  if (!budget || !category) return null
+  const isOpen = !!(budget && category)
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+
+  const prevBudgetRef = useRef(budget)
+  const prevCategoryRef = useRef(category)
+
+  useEffect(() => {
+    if (budget) prevBudgetRef.current = budget
+    if (category) prevCategoryRef.current = category
+  }, [budget, category])
+
+  const displayBudget = budget || prevBudgetRef.current
+  const displayCategory = category || prevCategoryRef.current
+
+  if (!shouldRender || !displayBudget || !displayCategory) return null
 
   const handleUpdate = async () => {
     setSaving(true)
     try {
-      await updateBudget(budget.id, { amountLimit: parseCurrency(amountLimit) })
+      await updateBudget(displayBudget.id, { amountLimit: parseCurrency(amountLimit) })
       onSuccess?.()
       onClose()
     } catch (err) {
@@ -45,7 +60,7 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
   const executeDelete = async () => {
     setDeleting(true)
     try {
-      await deleteBudget(budget.id)
+      await deleteBudget(displayBudget.id)
       onSuccess?.()
       onClose()
     } catch (err) {
@@ -63,8 +78,8 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
+      <div className={`fixed inset-0 z-60 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-70 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text">Edit Budget</h3>
@@ -79,12 +94,12 @@ export function EditBudgetModal({ budget, category, onClose, onSuccess }: EditBu
           <div className="space-y-4">
             <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 border border-gray-100">
               <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-xl shrink-0">
-                {category.icon}
+                {displayCategory.icon}
               </div>
               <div>
-                <p className="text-sm font-semibold text-text">{category.name}</p>
+                <p className="text-sm font-semibold text-text">{displayCategory.name}</p>
                 <p className="text-[11px] font-medium text-text-muted">
-                  Current Budget: Rp {formatCurrency(budget.amountLimit)}
+                  Current Budget: Rp {formatCurrency(displayBudget.amountLimit)}
                 </p>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { SegmentedControl } from '../ui/SegmentedControl'
 import { DatePicker } from '../ui/DatePicker'
 import { AddCategoryModal } from '../category/AddCategoryModal'
 import { useToastStore } from '../../stores/toastStore'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface EditTransactionSheetProps {
   transaction: Transaction | null
@@ -87,15 +88,18 @@ export function EditTransactionSheet({ transaction, isOpen, onClose, onSuccess }
     }
   }
 
-  if (!isOpen || !transaction) return null
+  const isOpenFull = !!(isOpen && transaction)
+  const { shouldRender, isClosing } = useModalAnimation(isOpenFull)
+
+  if (!shouldRender || !transaction) return null
 
   return createPortal(
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 z-50 overlay" onClick={onClose} />
+      <div className={`fixed inset-0 z-50 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
 
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+      <div className={`fixed inset-x-0 bottom-0 z-50 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between p-4 pb-2">

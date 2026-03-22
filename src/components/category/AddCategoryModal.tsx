@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { addCategory } from '../../hooks/useCategories'
 import { useToastStore } from '../../stores/toastStore'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface AddCategoryModalProps {
   isOpen: boolean
@@ -26,8 +27,9 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, defaultType = 'ex
   const [saving, setSaving] = useState(false)
 
   const addToast = useToastStore((s) => s.addToast)
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
 
-  if (!isOpen) return null
+  if (!shouldRender) return null
 
   const handleSave = async () => {
     if (!name.trim() || !icon || !currentFamilyId) return
@@ -54,8 +56,8 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, defaultType = 'ex
 
   return createPortal(
     <>
-      <div className="fixed inset-0 overlay" style={{ zIndex: 80 }} onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 animate-slide-up" style={{ zIndex: 90 }}>
+      <div className={`fixed inset-0 overlay ${isClosing ? 'animate-fade-out' : ''}`} style={{ zIndex: 80 }} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`} style={{ zIndex: 90 }}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text">New Category</h3>

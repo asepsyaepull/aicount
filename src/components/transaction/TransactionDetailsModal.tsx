@@ -2,8 +2,9 @@ import { createPortal } from 'react-dom'
 import { X, Pencil, Trash2, Calendar, Wallet, FileText, Tag } from 'lucide-react'
 import { formatCurrency } from '../../utils/currency'
 import { deleteTransaction, type Transaction } from '../../hooks/useTransactions'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { DestructiveModal } from '../ui/DestructiveModal'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface TransactionDetailsModalProps {
   isOpen: boolean
@@ -27,14 +28,23 @@ export function TransactionDetailsModal({
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
-  if (!isOpen || !transaction) return null
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+  
+  const prevTxRef = useRef(transaction)
+  useEffect(() => {
+    if (transaction) prevTxRef.current = transaction
+  }, [transaction])
+  
+  const displayTx = transaction || prevTxRef.current
 
-  const isIncome = transaction.type === 'income'
+  if (!shouldRender || !displayTx) return null
+
+  const isIncome = displayTx.type === 'income'
 
   const executeDelete = async () => {
     setDeleting(true)
     try {
-      await deleteTransaction(transaction.id)
+      await deleteTransaction(displayTx.id)
       onClose()
     } catch (err) {
       console.error('Failed to delete transaction:', err)
@@ -51,8 +61,8 @@ export function TransactionDetailsModal({
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-50 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+      <div className={`fixed inset-0 z-50 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-50 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
           
           {/* Header */}
@@ -80,12 +90,12 @@ export function TransactionDetailsModal({
           <div className="px-4 pb-6">
             <div className="text-center mb-8">
               <p className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-1">
-              {isIncome ? 'Income' : transaction.type === 'transfer' ? 'Transfer' : 'Expense'}
+              {isIncome ? 'Income' : displayTx.type === 'transfer' ? 'Transfer' : 'Expense'}
             </p>
-            <h2 className={`text-4xl font-extrabold ${isIncome ? 'text-emerald-500' : transaction.type === 'transfer' ? 'text-blue-500' : 'text-text'}`}>
-              {isIncome ? '+' : '-'} Rp {formatCurrency(transaction.amount)}
+            <h2 className={`text-4xl font-extrabold ${isIncome ? 'text-emerald-500' : displayTx.type === 'transfer' ? 'text-blue-500' : 'text-text'}`}>
+              {isIncome ? '+' : '-'} Rp {formatCurrency(displayTx.amount)}
             </h2>
-            <p className="text-lg font-medium text-text mt-2">{transaction.note || categoryName}</p>
+            <p className="text-lg font-medium text-text mt-2">{displayTx.note || categoryName}</p>
           </div>
 
           <div className="bg-gray-50 rounded-2xl p-4 space-y-4 border border-gray-100">
@@ -116,7 +126,7 @@ export function TransactionDetailsModal({
               <div>
                 <p className="text-[11px] font-medium text-text-muted">Date & Time</p>
                 <p className="text-sm font-semibold text-text">
-                  {transaction.date.toLocaleDateString('en-US', {
+                  {displayTx.date.toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -126,14 +136,14 @@ export function TransactionDetailsModal({
               </div>
             </div>
 
-            {transaction.note && (
+            {displayTx.note && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
                   <FileText size={14} className="text-text-secondary" />
                 </div>
                 <div>
                   <p className="text-[11px] font-medium text-text-muted">Notes</p>
-                  <p className="text-sm font-medium text-text leading-snug">{transaction.note}</p>
+                  <p className="text-sm font-medium text-text leading-snug">{displayTx.note}</p>
                 </div>
               </div>
             )}

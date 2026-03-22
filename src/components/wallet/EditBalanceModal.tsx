@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { bankOptions, ewalletOptions } from '../../constants/wallet'
 import { updateWallet, type Wallet as WalletType } from '../../hooks/useWallets'
 import { formatCurrency, formatInputCurrency, parseCurrency } from '../../utils/currency'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface EditBalanceModalProps {
   wallet: WalletType | null
@@ -28,7 +29,8 @@ export function EditBalanceModal({ wallet, onClose, onSuccess }: EditBalanceModa
     }
   }, [wallet])
 
-  if (!wallet) return null
+  const { shouldRender, isClosing } = useModalAnimation(!!wallet)
+  if (!shouldRender || !wallet) return null
 
   const handleUpdateBalance = async () => {
     setSaving(true)
@@ -48,8 +50,8 @@ export function EditBalanceModal({ wallet, onClose, onSuccess }: EditBalanceModa
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-60 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
+      <div className={`fixed inset-0 z-60 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-70 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-text">Edit Balance</h3>

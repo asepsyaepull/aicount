@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, User } from 'lucide-react'
 import { updateProfile, type UserProfile } from '../../hooks/useUser'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface EditProfileModalProps {
   user: UserProfile | null
@@ -22,7 +23,9 @@ export function EditProfileModal({ user, isOpen, onClose, onSuccess }: EditProfi
     }
   }, [user, isOpen])
 
-  if (!isOpen || !user) return null
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
+
+  if (!shouldRender || !user) return null
 
   const handleSave = async () => {
     if (!name.trim()) return
@@ -44,8 +47,8 @@ export function EditProfileModal({ user, isOpen, onClose, onSuccess }: EditProfi
 
   return createPortal(
     <>
-      <div className="fixed inset-0 z-50 overlay" onClick={onClose} />
-      <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
+      <div className={`fixed inset-0 z-50 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-x-0 bottom-0 z-50 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
         <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
           <div className="flex items-center justify-between p-4 pb-2">
             <h3 className="text-lg font-bold text-text">Edit Profile</h3>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, ChevronLeft, ChevronRight, X, Calendar as CalendarIcon } from 'lucide-react'
+import { useModalAnimation } from '../../hooks/useModalAnimation'
 
 interface DatePickerProps {
   value: string // 'YYYY-MM-DD'
@@ -20,6 +21,8 @@ const MONTHS = [
 export function DatePicker({ value, onChange, maxDate, className = '', colorVariant = 'gray' }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [viewDate, setViewDate] = useState(new Date())
+
+  const { shouldRender, isClosing } = useModalAnimation(isOpen)
 
   // Parse YYYY-MM-DD safely
   const parseDateString = (dateStr: string) => {
@@ -103,10 +106,10 @@ export function DatePicker({ value, onChange, maxDate, className = '', colorVari
       </button>
 
       {/* Modal Slide Up */}
-      {isOpen && createPortal(
+      {shouldRender && createPortal(
         <>
-          <div className="fixed inset-0 z-60 overlay" onClick={() => setIsOpen(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-70 animate-slide-up">
+          <div className={`fixed inset-0 z-60 overlay ${isClosing ? 'animate-fade-out' : ''}`} onClick={() => setIsOpen(false)} />
+          <div className={`fixed inset-x-0 bottom-0 z-70 ${isClosing ? 'animate-slide-down' : 'animate-slide-up'}`}>
             <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl p-5 pb-8">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
