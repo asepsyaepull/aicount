@@ -57,7 +57,7 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
   return (
     <>
       {/* Trigger Button */}
-      <button 
+      <button
         onClick={handleOpen}
         className={`relative flex items-center gap-1 cursor-pointer transition-opacity hover:opacity-80 active:scale-95 ${colorStyles[colorVariant]} ${className}`}
       >
@@ -71,7 +71,7 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
         <>
           <div className="fixed inset-0 z-50 overlay" onClick={() => setIsOpen(false)} />
           <div className="fixed inset-x-0 bottom-0 z-50 animate-slide-up">
-            <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto">
+            <div className="max-w-md mx-auto bg-white rounded-t-3xl shadow-2xl max-h-[90dvh] overflow-y-auto pb-16">
               {/* Header */}
               <div className="flex items-center justify-between p-4 pb-2">
                 <h3 className="text-lg font-bold text-text">Select Month</h3>
@@ -86,14 +86,14 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
               <div className="px-4 pb-6">
                 {/* Year Selector */}
                 <div className="flex items-center justify-between px-2 mb-6">
-                  <button 
+                  <button
                   onClick={() => setViewYear(y => y - 1)}
                   className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-text-secondary transition-colors"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <span className="text-lg font-bold text-text">{viewYear}</span>
-                <button 
+                <button
                   onClick={() => setViewYear(y => y + 1)}
                   disabled={viewYear >= now.getFullYear()}
                   className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-text-secondary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -108,7 +108,7 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
                   const isSelected = activeMonthIdx === idx && activeYear === viewYear
                   // Highlight current actual month slightly different if needed
                   const isActualCurrentMonth = idx === now.getMonth() && viewYear === now.getFullYear()
-                  
+
                   const isDisabled = viewYear > now.getFullYear() || (viewYear === now.getFullYear() && idx > now.getMonth())
 
                   return (
@@ -119,9 +119,9 @@ export function MonthPicker({ className = '', colorVariant = 'primary' }: MonthP
                       className={`py-3 rounded-2xl text-sm font-semibold transition-all ${
                         isDisabled
                           ? 'bg-gray-50 text-gray-300 border border-transparent cursor-not-allowed'
-                          : isSelected 
-                            ? 'gradient-primary text-white shadow-md shadow-primary/30 border border-transparent active:scale-95' 
-                            : isActualCurrentMonth 
+                          : isSelected
+                            ? 'gradient-primary text-white shadow-md shadow-primary/30 border border-transparent active:scale-95'
+                            : isActualCurrentMonth
                               ? 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 active:scale-95'
                               : 'bg-gray-50 text-text-secondary border border-gray-100 hover:bg-gray-100 active:scale-95'
                       }`}

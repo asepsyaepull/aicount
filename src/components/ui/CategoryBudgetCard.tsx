@@ -27,7 +27,6 @@ export function CategoryBudgetCard({ categoryId, amountLimit, category, variant 
     return (
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50 animate-fade-in">
         <div className="flex items-start justify-between mb-2">
-          <span className="text-lg">{category.icon}</span>
           <span className="text-2xl">{category.icon}</span>
         </div>
         <p className="text-sm font-semibold text-text mb-0.5">{category.name}</p>
@@ -58,7 +57,7 @@ export function CategoryBudgetCard({ categoryId, amountLimit, category, variant 
             <p className="text-sm font-semibold text-text flex items-center gap-1.5">
               {category.name}
               {variant === 'list' && onEdit && (
-                <button 
+                <button
                   onClick={onEdit}
                   className="p-1 rounded bg-gray-50 text-text-muted hover:text-primary transition-colors hover:bg-primary-50 active:scale-95"
                   title="Edit Budget"

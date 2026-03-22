@@ -33,7 +33,10 @@ export function BudgetPage() {
         {/* Overall Budget Card */}
         <div className="bg-white rounded-2xl p-5 shadow-lg shadow-black/5">
           <div className="flex items-center justify-between mb-1">
-            <MonthPicker colorVariant="gray" />
+            <MonthPicker
+            colorVariant="primary"
+              className='flex items-center gap-1 text-xs font-semibold text-primary bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors'
+            />
             <span className={`text-xs font-bold px-2 py-1 rounded-lg ${
               percentage >= 100 ? 'bg-red-50 text-red-500' :
               percentage >= 80 ? 'bg-yellow-50 text-yellow-600' :
@@ -53,13 +56,13 @@ export function BudgetPage() {
           <ProgressBar percentage={percentage} height="h-3" />
 
           <div className="mt-4">
-            <SummaryStatCard 
-              leftTitle="Total Budget" 
-              leftAmount={totalLimit} 
+            <SummaryStatCard
+              leftTitle="Total Budget"
+              leftAmount={totalLimit}
               leftColorClass="text-text"
-              rightTitle="Total Spent" 
-              rightAmount={totalSpent} 
-              rightColorClass="text-red-500" 
+              rightTitle="Total Spent"
+              rightAmount={totalSpent}
+              rightColorClass="text-red-500"
             />
           </div>
         </div>
@@ -80,11 +83,11 @@ export function BudgetPage() {
 
         <div className="space-y-3 mb-6">
           {budgets.map((budget) => (
-            <CategoryBudgetCard 
-              key={budget.id} 
+            <CategoryBudgetCard
+              key={budget.id}
               categoryId={budget.categoryId}
               amountLimit={budget.amountLimit}
-              category={categories.find(c => c.id === budget.categoryId) || null} 
+              category={categories.find(c => c.id === budget.categoryId) || null}
               variant="list"
               onEdit={() => setEditingBudget(budget)}
             />
@@ -102,8 +105,8 @@ export function BudgetPage() {
 
       {/* Modals */}
       <AddBudgetModal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onSuccess={refreshBudgets} />
-      <EditBudgetModal 
-        budget={editingBudget} 
+      <EditBudgetModal
+        budget={editingBudget}
         category={editingBudget ? categories.find(c => c.id === editingBudget.categoryId) || null : null}
         onClose={() => setEditingBudget(null)}
         onSuccess={refreshBudgets}
