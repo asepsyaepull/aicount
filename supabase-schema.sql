@@ -69,6 +69,23 @@ CREATE TABLE public.budgets (
 );
 
 -- ==========================================
+-- 8. Create push subscriptions table
+-- ==========================================
+CREATE TABLE public.push_subscriptions (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  family_id UUID REFERENCES public.families(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  endpoint TEXT UNIQUE NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own subscriptions" ON public.push_subscriptions
+  FOR ALL USING (user_id = auth.uid());
+
+-- ==========================================
 -- PostgreSQL Trigger: Atomic Wallet Update
 -- ==========================================
 CREATE OR REPLACE FUNCTION update_wallet_balance()

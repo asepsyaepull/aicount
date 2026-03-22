@@ -11,6 +11,7 @@ import { AIAdvisor } from '../components/ai/AIAdvisor'
 import { DestructiveModal } from '../components/ui/DestructiveModal'
 import { bankOptions, ewalletOptions } from '../constants/wallet'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 
 const menuItems = [
   { icon: Bell, label: 'Notifications', subtitle: 'Manage alerts' },
@@ -25,6 +26,7 @@ const menuItems = [
 export function ProfilePage() {
   const { user: currentUser, refresh: refreshUser } = useCurrentUser()
   const { wallets, totalBalance, refresh } = useWallets()
+  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications()
 
   // Modal States
   const [showEditProfile, setShowEditProfile] = useState(false)
@@ -80,7 +82,7 @@ export function ProfilePage() {
 
   const handleMenuClick = (label: string) => {
     if (label === 'AI Advisor') setIsAdvisorOpen(true)
-    else if (label === 'Notifications' || label === 'Security' || label === 'Help & Support') {
+    else if (label === 'Security' || label === 'Help & Support') {
       alert('Fitur ini sedang dalam pengembangan (Coming Soon) 🚀')
     }
   }
@@ -223,11 +225,24 @@ export function ProfilePage() {
       <div className="px-5 mt-6">
         <h2 className="text-base font-bold text-text mb-3">Settings</h2>
         <div className="bg-white rounded-2xl shadow-sm border border-gray-50 overflow-hidden">
-          {menuItems.map((item, i) => (
+          {menuItems.map((item, i) => {
+            const isPushNotif = item.label === 'Notifications'
+            return (
             <button
               key={item.label}
-              disabled={item.disabled}
-              onClick={() => handleMenuClick(item.label)}
+              disabled={item.disabled || (isPushNotif && isLoading)}
+              onClick={() => {
+                if (isPushNotif) {
+                  if (!isSupported) {
+                    alert('Browser Anda tidak mendukung Web Push Notifications.')
+                    return
+                  }
+                  if (isSubscribed) unsubscribe()
+                  else subscribe()
+                } else {
+                  handleMenuClick(item.label)
+                }
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors ${i > 0 ? 'border-t border-gray-50' : ''
                 } ${item.disabled ? 'opacity-40' : ''}`}
             >
@@ -236,11 +251,18 @@ export function ProfilePage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-text">{item.label}</p>
-                <p className="text-[10px] text-text-muted">{item.subtitle}</p>
+                <p className="text-[10px] text-text-muted">{isPushNotif ? (isSubscribed ? 'Active' : 'Disabled') : item.subtitle}</p>
               </div>
-              <ChevronRight size={16} className="text-text-muted" />
+              {isPushNotif ? (
+                <div className={`w-8 h-4 rounded-full transition-colors ${isSubscribed ? 'bg-primary' : 'bg-gray-300'} relative`}>
+                  <div className={`absolute top-0.5 bottom-0.5 w-3 bg-white rounded-full transition-all ${isSubscribed ? 'right-0.5' : 'left-0.5'}`} />
+                </div>
+              ) : (
+                <ChevronRight size={16} className="text-text-muted" />
+              )}
             </button>
-          ))}
+            )
+          })}
         </div>
       </div>
 
