@@ -92,6 +92,8 @@ export function usePushNotifications() {
       return true
     } catch (err) {
       console.error('Failed to subscribe:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Gagal mengaktifkan notifikasi: ${msg}`)
       return false
     } finally {
       setIsLoading(false)
@@ -117,6 +119,8 @@ export function usePushNotifications() {
       setPermission(Notification.permission)
     } catch (err) {
       console.error('Failed to unsubscribe:', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Gagal mematikan notifikasi: ${msg}`)
     } finally {
       setIsLoading(false)
     }
