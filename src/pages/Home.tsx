@@ -77,7 +77,12 @@ export function HomePage() {
 
           <ProgressBar percentage={budgetPercentage} height="h-3" />
           <div className="flex items-center justify-end mt-1.5">
-            <span className="text-xs font-medium text-text-muted">{budgetPercentage}% Used</span>
+            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${budgetPercentage >= 100 ? 'bg-red-50 text-red-500' :
+                budgetPercentage >= 80 ? 'bg-yellow-50 text-yellow-600' :
+                  'bg-emerald-50 text-emerald-600'
+              }`}>
+              {budgetPercentage}% Used
+            </span>
           </div>
 
           <div className="mt-4">
