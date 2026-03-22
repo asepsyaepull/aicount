@@ -64,7 +64,10 @@ export function usePushNotifications() {
       }
 
       // 2. Get Service Worker Registration
-      const registration = await navigator.serviceWorker.ready
+      const registration = await navigator.serviceWorker.getRegistration()
+      if (!registration) {
+        throw new Error('PWA Service Worker belum aktif. Coba tutup aplikasi completely (swipe up) lalu buka lagi.')
+      }
 
       // 3. Subscribe to Push Manager
       const subscription = await registration.pushManager.subscribe({
@@ -103,7 +106,9 @@ export function usePushNotifications() {
   const unsubscribe = async () => {
     setIsLoading(true)
     try {
-      const registration = await navigator.serviceWorker.ready
+      const registration = await navigator.serviceWorker.getRegistration()
+      if (!registration) throw new Error('Service Worker not found')
+      
       const subscription = await registration.pushManager.getSubscription()
       if (subscription) {
         // Unsubscribe from browser
