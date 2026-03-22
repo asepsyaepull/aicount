@@ -121,6 +121,7 @@ export function TransactionsPage() {
         walletName={selectedTx ? getWalletName(selectedTx.walletId) : ''}
         onClose={() => setSelectedTx(null)}
         onEdit={() => setIsEditOpen(true)}
+        onDelete={refreshTransactions}
       />
 
       <EditTransactionSheet

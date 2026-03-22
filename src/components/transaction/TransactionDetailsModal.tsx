@@ -14,6 +14,7 @@ interface TransactionDetailsModalProps {
   walletName: string
   onClose: () => void
   onEdit: () => void
+  onDelete?: () => void
 }
 
 export function TransactionDetailsModal({
@@ -24,6 +25,7 @@ export function TransactionDetailsModal({
   walletName,
   onClose,
   onEdit,
+  onDelete,
 }: TransactionDetailsModalProps) {
   const [deleting, setDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -45,6 +47,7 @@ export function TransactionDetailsModal({
     setDeleting(true)
     try {
       await deleteTransaction(displayTx.id)
+      onDelete?.()
       onClose()
     } catch (err) {
       console.error('Failed to delete transaction:', err)

@@ -172,6 +172,10 @@ export function HomePage() {
         walletName={selectedTx ? wallets.find(w => w.id === selectedTx.walletId)?.name || '' : ''}
         onClose={() => setSelectedTx(null)}
         onEdit={() => setIsEditOpen(true)}
+        onDelete={() => {
+          refreshTransactions()
+          refreshBudgets()
+        }}
       />
 
       <EditTransactionSheet
