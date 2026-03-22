@@ -1,4 +1,4 @@
-import { Bell, Sparkles } from 'lucide-react'
+import { Bell, Sparkles, PieChart } from 'lucide-react'
 import { useState } from 'react'
 import { useCurrentUser } from '../hooks/useUser'
 import { useCategories } from '../hooks/useCategories'
@@ -17,8 +17,10 @@ import { AIAdvisor } from '../components/ai/AIAdvisor'
 import { MonthPicker } from '../components/ui/MonthPicker'
 import { TransactionDetailsModal } from '../components/transaction/TransactionDetailsModal'
 import { EditTransactionSheet } from '../components/transaction/EditTransactionSheet'
+import { useNavigate } from 'react-router-dom'
 
 export function HomePage() {
+  const navigate = useNavigate()
   const { user: currentUser } = useCurrentUser()
   const { transactions: recentTransactions, refresh: refreshTransactions } = useTransactions(5)
   const { totalLimit, totalSpent } = useTotalBudget()
@@ -95,6 +97,13 @@ export function HomePage() {
               rightPrefix="-"
               rightColorClass="text-red-500"
             />
+            <button
+              onClick={() => navigate('/statistics')}
+              className="w-full mt-4 py-2.5 bg-gray-50 text-text-secondary rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors"
+            >
+              <PieChart size={18} />
+              View Full Statistics
+            </button>
           </div>
         </div>
       </div>
