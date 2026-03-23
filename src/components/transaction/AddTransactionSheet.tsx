@@ -13,6 +13,7 @@ import { AddCategoryModal } from '../category/AddCategoryModal'
 import { Plus } from 'lucide-react'
 import { useToastStore } from '../../stores/toastStore'
 import { useModalAnimation } from '../../hooks/useModalAnimation'
+import { supabase } from '../../lib/supabase'
 
 export interface AddTransactionSheetProps {
   isOpen: boolean
@@ -155,6 +156,52 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
     setSaving(true)
 
     try {
+      // --- TRIGGER BUDGET ALERT LOGIC ---
+      let alertTitle = ''
+      let alertBody = ''
+
+      if (type === 'expense') {
+        const selectedMonth = useAppStore.getState().selectedMonth
+        const { data: budgetData } = await supabase
+          .from('budgets')
+          .select('amount_limit')
+          .eq('family_id', currentFamilyId)
+          .eq('category_id', categoryId)
+          .eq('month_year', selectedMonth)
+          .single()
+
+        if (budgetData && budgetData.amount_limit > 0) {
+          const amountLimit = Number(budgetData.amount_limit)
+          const [month, year] = selectedMonth.split('-').map(Number)
+          const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0]
+          const endDate = new Date(year, month, 0).toISOString().split('T')[0]
+
+          const { data: expenses } = await supabase
+            .from('transactions')
+            .select('amount')
+            .eq('family_id', currentFamilyId)
+            .eq('category_id', categoryId)
+            .eq('type', 'expense')
+            .gte('date', startDate)
+            .lte('date', endDate)
+
+          const currentSpent = expenses?.reduce((sum, t) => sum + Number(t.amount), 0) || 0
+          const expenseAmount = parseCurrency(amount)
+          const newSpent = currentSpent + expenseAmount
+
+          const catName = categories.find(c => c.id === categoryId)?.name || 'Kategori'
+
+          if (currentSpent < amountLimit && newSpent >= amountLimit) {
+            alertTitle = '⚠️ Budget Habis!'
+            alertBody = `Pengeluaran ${catName} sudah mencapai 100% batas bulan ini.`
+          } else if (currentSpent < amountLimit * 0.8 && newSpent >= amountLimit * 0.8) {
+            alertTitle = '⚠️ Budget Menipis'
+            alertBody = `Pengeluaran ${catName} sudah mencapai 80% dari budget bulanan.`
+          }
+        }
+      }
+      // ----------------------------------
+
       await addTransaction({
         familyId: currentFamilyId,
         createdBy: currentUserId,
@@ -171,10 +218,24 @@ export function AddTransactionSheet({ isOpen, onClose, onSuccess }: AddTransacti
       triggerRefresh()
       onSuccess?.()
       onClose()
+      
       // Reset form
       setAmount('')
       setNote('')
       setSmartInput('')
+
+      // FIRE PUSH NOTIFICATION IF BUDGET CROSSED
+      if (alertTitle && alertBody) {
+        // Make the HTTP call asynchronously so it doesn't block the UI
+        supabase.functions.invoke('send-push', {
+          body: {
+            title: alertTitle,
+            body: alertBody,
+            familyId: currentFamilyId
+          }
+        }).catch(err => console.error('Failed to trigger push edge function', err))
+      }
+
     } catch (err) {
       console.error('Failed to save transaction:', err)
       addToast('Gagal menyimpan transaksi', 'error')
